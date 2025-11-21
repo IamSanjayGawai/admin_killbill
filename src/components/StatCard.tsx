@@ -27,14 +27,24 @@ export default function StatCard({ title, value, icon, trend, color = 'blue' }: 
         <div className="flex-1">
           <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
           <p className="text-2xl font-bold text-gray-900">{value}</p>
+
           {trend && (
-            <div className={`flex items-center mt-2 text-sm ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+            <div
+              className={`flex items-center mt-2 text-sm ${
+                trend.isPositive ? 'text-green-600' : 'text-red-600'
+              }`}
+            >
               {trend.isPositive ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
               <span className="ml-1">{Math.abs(trend.value)}%</span>
             </div>
           )}
         </div>
-        <div className={`p-3 rounded-lg ${colorClasses[color as keyof typeof colorClasses] || colorClasses.blue}`}>
+
+        <div
+          className={`p-3 rounded-lg ${
+            colorClasses[color as keyof typeof colorClasses] || colorClasses.blue
+          }`}
+        >
           {icon}
         </div>
       </div>

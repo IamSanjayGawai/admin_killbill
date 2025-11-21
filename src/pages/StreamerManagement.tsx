@@ -29,7 +29,7 @@ export default function StreamerManagement() {
           rejected: 'bg-red-100 text-red-800'
         };
         return (
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status as keyof typeof colors]}`}>
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ₹{colors[status as keyof typeof colors]}`}>
             {status}
           </span>
         );
@@ -73,7 +73,7 @@ export default function StreamerManagement() {
     {
       key: 'earnings',
       label: 'Earnings',
-      render: (value: unknown) => `$${(value as number).toLocaleString()}`
+      render: (value: unknown) => `₹${(value as number).toLocaleString()}`
     },
     {
       key: 'followers',
@@ -81,25 +81,11 @@ export default function StreamerManagement() {
       render: (value: unknown) => (value as number).toLocaleString()
     },
     { key: 'totalStreams', label: 'Total Streams' },
-    {
-      key: 'actions',
-      label: 'Actions',
-      render: () => (
-        <Button size="sm" variant="primary">
-          View Profile
-        </Button>
-      )
-    }
+  
   ];
 
   const liveMonitoringColumns = [
-    {
-      key: 'thumbnail',
-      label: 'Preview',
-      render: (value: unknown) => (
-        <img src={value as string} alt="Stream" className="w-16 h-12 object-cover rounded" />
-      )
-    },
+   
     { key: 'streamerName', label: 'Streamer' },
     { key: 'title', label: 'Title' },
     {
@@ -118,49 +104,13 @@ export default function StreamerManagement() {
       render: (value: unknown) => `${value} min`
     },
     { key: 'category', label: 'Category' },
-    {
-      key: 'actions',
-      label: 'Actions',
-      render: () => (
-        <Button size="sm" variant="primary">
-          Monitor
-        </Button>
-      )
-    }
+   
   ];
 
-  const applicationsTab = (
-    <Card>
-      <Table
-        columns={applicationColumns}
-        data={mockStreamers.filter(s => s.status === 'pending').slice(0, 10)}
-      />
-    </Card>
-  );
-
+  
   const streamersTab = (
     <Card>
-      <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 bg-blue-50 rounded-lg">
-          <p className="text-sm text-gray-600">Total Streamers</p>
-          <p className="text-2xl font-bold text-gray-900">{mockStreamers.length}</p>
-          <div className="flex items-center gap-1 text-green-600 text-sm mt-1">
-            <TrendingUp size={14} />
-            <span>+12 this week</span>
-          </div>
-        </div>
-        <div className="p-4 bg-green-50 rounded-lg">
-          <p className="text-sm text-gray-600">Active Now</p>
-          <p className="text-2xl font-bold text-gray-900">{mockLiveStreams.length}</p>
-        </div>
-        <div className="p-4 bg-yellow-50 rounded-lg">
-          <p className="text-sm text-gray-600">Pending Applications</p>
-          <p className="text-2xl font-bold text-gray-900">
-            {mockStreamers.filter(s => s.status === 'pending').length}
-          </p>
-        </div>
-      </div>
-      <Table columns={streamerColumns} data={mockStreamers.slice(0, 10)} />
+            <Table columns={streamerColumns} data={mockStreamers.slice(0, 10)} />
     </Card>
   );
 
@@ -179,9 +129,16 @@ export default function StreamerManagement() {
 
       <Tabs
         tabs={[
-          { key: 'applications', label: 'Applications', content: applicationsTab },
-          { key: 'streamers', label: 'All Streamers', content: streamersTab },
-          { key: 'live', label: 'Live Monitoring', content: liveMonitoringTab }
+         
+          {
+             key: 'streamers',
+              label: `All Streamers (${mockStreamers.length})`, 
+             content: streamersTab
+             },
+          {
+             key: 'live',
+              label: `Live Monitoring (${mockStreamers.length})`,
+             content: liveMonitoringTab }
         ]}
       />
 
@@ -241,7 +198,7 @@ export default function StreamerManagement() {
                   <img
                     key={i}
                     src={`https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=400`}
-                    alt={`Sample ${i}`}
+                    alt={`Sample ₹{i}`}
                     className="w-full h-24 object-cover rounded"
                   />
                 ))}

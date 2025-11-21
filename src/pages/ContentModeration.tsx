@@ -34,7 +34,7 @@ export default function ContentModeration() {
               {content.type}
             </div>
             <div
-              className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-medium ${
+              className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-medium ₹{
                 content.status === 'pending'
                   ? 'bg-yellow-500 text-white'
                   : content.status === 'approved'
@@ -208,7 +208,7 @@ export default function ContentModeration() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Status</p>
-                <p className={`font-medium capitalize ${
+                <p className={`font-medium capitalize ₹{
                   selectedContent.status === 'approved' ? 'text-green-600' :
                   selectedContent.status === 'rejected' ? 'text-red-600' : 'text-yellow-600'
                 }`}>

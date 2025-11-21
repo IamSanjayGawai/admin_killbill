@@ -6,20 +6,56 @@ import Input from '../components/Input';
 import Select from '../components/Select';
 import Modal from '../components/Modal';
 import Tabs from '../components/Tabs';
-import { Search, Edit, Ban, CheckCircle, Eye } from 'lucide-react';
+import { Search, Edit, Eye } from 'lucide-react';
 import { generateMockUsers, generateMockReportedUsers } from '../utils/mockData';
 
 export default function UserManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedUser, setSelectedUser] = useState<typeof mockUsers[0] | null>(null);
+
+  
+
+  const [users, setUsers] = useState(()=> generateMockUsers(50));
+  const [mockReportedUsers,setMockReportedUsers] = useState(()=>generateMockReportedUsers(20)
+) 
+
+  const [selectedUser, setSelectedUser] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
-  const mockUsers = generateMockUsers(50);
-  const mockReportedUsers = generateMockReportedUsers(20);
+  // TEMP DATA FOR EDIT MODAL INPUTS  
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editStatus, setEditStatus] = useState("active");
 
+  const [isActionModalOpen, setIsActionModalOpen] = useState(false);
+  const [selectedReport,setSelectedReport] = useState(null);
+  const[reportStatus,setReportStatus] = useState("");
+  // Export CSV Function
+
+  const exportCSV = () =>{
+    const headers = ['User ID' , 'Name' , 'Email', 'Status', 'Joined Date','Coins'];
+
+    const rows = users.map((u)=> [u.id, u.name,u.email,u.status,u.joinedDate,u.coins])
+
+    let csvContent = 'data:text/csv;charset=utf-8';
+    csvContent += headers.join(",") + "\n";
+    rows.forEach((row)=>{
+      csvContent += row.join(",") + '\n';
+    });
+
+    const encodeUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute("href",encodeUri);
+    link.setAttribute('download','users_list.csv');
+    document.body.appendChild(link);
+    link.click();
+  };
+
+  // ---------------------------------
+  // TABLE COLUMNS
+  // ---------------------------------
   const userColumns = [
     { key: 'id', label: 'User ID' },
     { key: 'name', label: 'Name' },
@@ -27,52 +63,51 @@ export default function UserManagement() {
     {
       key: 'status',
       label: 'Status',
-      render: (value: unknown) => {
-        const status = value as string;
+      render: (value) => {
         const colors = {
           active: 'bg-green-100 text-green-800',
           blocked: 'bg-red-100 text-red-800',
           suspended: 'bg-yellow-100 text-yellow-800'
         };
         return (
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status as keyof typeof colors]}`}>
-            {status}
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[value]}`}>
+            {value}
           </span>
         );
       }
     },
     { key: 'joinedDate', label: 'Joined Date' },
     { key: 'coins', label: 'Coins' },
+
+    // ACTIONS (Removed Block/Unblock button as you requested)
     {
       key: 'actions',
       label: 'Actions',
-      render: (_: unknown, row: Record<string, unknown>) => (
+      render: (_, row) => (
         <div className="flex gap-2">
           <Button
             size="sm"
             variant="ghost"
             onClick={() => {
-              setSelectedUser(row as typeof mockUsers[0]);
+              setSelectedUser(row);
               setIsViewModalOpen(true);
             }}
           >
             <Eye size={16} />
           </Button>
+
           <Button
             size="sm"
             variant="secondary"
             onClick={() => {
-              setSelectedUser(row as typeof mockUsers[0]);
+              setSelectedUser(row);
+              setEditName(row.name);
+              setEditEmail(row.email);
+              setEditStatus(row.status);
               setIsEditModalOpen(true);
             }}
           >
             <Edit size={16} />
-          </Button>
-          <Button
-            size="sm"
-            variant={row.status === 'blocked' ? 'success' : 'danger'}
-          >
-            {row.status === 'blocked' ? <CheckCircle size={16} /> : <Ban size={16} />}
           </Button>
         </div>
       )
@@ -88,16 +123,15 @@ export default function UserManagement() {
     {
       key: 'status',
       label: 'Status',
-      render: (value: unknown) => {
-        const status = value as string;
+      render: (value) => {
         const colors = {
           pending: 'bg-yellow-100 text-yellow-800',
           reviewed: 'bg-blue-100 text-blue-800',
           action_taken: 'bg-green-100 text-green-800'
         };
         return (
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status as keyof typeof colors]}`}>
-            {status.replace('_', ' ')}
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[value]}`}>
+            {value.replace('_', ' ')}
           </span>
         );
       }
@@ -105,19 +139,45 @@ export default function UserManagement() {
     {
       key: 'actions',
       label: 'Actions',
-      render: () => (
+      render: (_, row) => (
         <div className="flex gap-2">
-          <Button size="sm" variant="primary">
-            Review
-          </Button>
-          <Button size="sm" variant="danger">
-            Take Action
-          </Button>
+          <Button size="sm" variant="primary">Review</Button>
+
+          <Button size="sm" variant="danger" onClick={()=>{setSelectedReport(row);
+            setReportStatus(row.status);
+            setIsActionModalOpen(true);
+
+          }}
+
+          >Take Action</Button>
         </div>
-      )
-    }
+      ),
+    },
   ];
 
+  // ---------------------------------
+  // HANDLE SAVE FROM EDIT MODAL
+  // ---------------------------------
+  const handleSave = () => {
+    const updated = users.map((u) =>
+      u.id === editdUserId
+        ? {
+            ...u,
+            name: editName,
+            email: editEmail,
+            status: editStatus
+          }
+        : u
+    
+    );
+
+    setUsers(updated);
+    setIsEditModalOpen(false);
+  };
+
+  // ---------------------------------
+  // USERS TAB
+  // ---------------------------------
   const usersTab = (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row gap-4">
@@ -130,6 +190,7 @@ export default function UserManagement() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+
         <Select
           options={[
             { value: 'all', label: 'All Status' },
@@ -140,16 +201,17 @@ export default function UserManagement() {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         />
-        <Button variant="primary">Export CSV</Button>
+
+        <Button variant="primary" onClick={exportCSV}>Export CSV</Button>
       </div>
 
       <Card>
         <Table
           columns={userColumns}
-          data={mockUsers.slice((currentPage - 1) * 10, currentPage * 10)}
+          data={users.slice((currentPage - 1) * 10, currentPage * 10)}
           pagination={{
             currentPage,
-            totalPages: Math.ceil(mockUsers.length / 10),
+            totalPages: Math.ceil(users.length / 10),
             onPageChange: setCurrentPage
           }}
         />
@@ -163,6 +225,9 @@ export default function UserManagement() {
     </Card>
   );
 
+  // ---------------------------------
+  // RETURN JSX
+  // ---------------------------------
   return (
     <div className="space-y-6">
       <div>
@@ -172,11 +237,20 @@ export default function UserManagement() {
 
       <Tabs
         tabs={[
-          { key: 'users', label: 'All Users', content: usersTab },
-          { key: 'reported', label: 'Reported Users', content: reportedUsersTab }
+          {
+            key:'users',
+            label:`All Users (${users.length})`,
+            content:usersTab
+          },
+          {
+            key:'reported',
+            label:`Reported Users (${mockReportedUsers.length})`,
+            content:reportedUsersTab
+          }
         ]}
       />
 
+      {/* EDIT MODAL */}
       <Modal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
@@ -186,27 +260,21 @@ export default function UserManagement() {
             <Button variant="secondary" onClick={() => setIsEditModalOpen(false)}>
               Cancel
             </Button>
-            <Button variant="primary">Save Changes</Button>
+            <Button variant="primary" onClick={handleSave}>
+              Save Changes
+            </Button>
           </>
         }
       >
         {selectedUser && (
           <div className="space-y-4">
-            <Input label="Name" defaultValue={selectedUser.name} />
-            <Input label="Email" defaultValue={selectedUser.email} />
-            <Select
-              label="Status"
-              options={[
-                { value: 'active', label: 'Active' },
-                { value: 'blocked', label: 'Blocked' },
-                { value: 'suspended', label: 'Suspended' }
-              ]}
-              defaultValue={selectedUser.status}
-            />
-          </div>
+            <Input label="Name" value={editName} onChange={(e) => setEditName(e.target.value)} />
+            <Input label="Email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
+                </div>
         )}
       </Modal>
 
+      {/* VIEW MODAL */}
       <Modal
         isOpen={isViewModalOpen}
         onClose={() => setIsViewModalOpen(false)}
@@ -230,7 +298,7 @@ export default function UserManagement() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total Spent</p>
-                <p className="font-medium">${selectedUser.totalSpent}</p>
+                <p className="font-medium">₹{selectedUser.totalSpent}</p>
               </div>
             </div>
 
@@ -247,6 +315,50 @@ export default function UserManagement() {
           </div>
         )}
       </Modal>
+      <Modal
+  isOpen={isActionModalOpen}
+  onClose={() => setIsActionModalOpen(false)}
+  title="Update Report Status"
+  footer={
+    <>
+      <Button variant="secondary" onClick={() => setIsActionModalOpen(false)}>
+        Cancel
+      </Button>
+      <Button
+        variant="primary"
+        onClick={() => {
+          // UPDATE STATUS LOGIC (extend if needed)
+          setMockReportedUsers(prev=>
+            prev.map(r=>
+              r.id === selectedReport.id ? {...r, status: reportStatus}
+              : r
+            )
+          );
+          setIsActionModalOpen(false);
+        }}
+      >
+        Save
+      </Button>
+    </>
+  }
+>
+  {selectedReport && (
+    <div className="space-y-4">
+
+      <Select
+        label="Update Status"
+        value={reportStatus}
+        onChange={(e) => setReportStatus(e.target.value)}
+        options={[
+          { value: "pending", label: "Pending" },
+          { value: "reviewed", label: "Reviewed" },
+          { value: "action_taken", label: "Action Taken" }
+        ]}
+      />
+    </div>
+  )}
+</Modal>
+
     </div>
   );
 }

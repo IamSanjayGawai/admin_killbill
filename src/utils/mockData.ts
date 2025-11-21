@@ -5,7 +5,11 @@ export const generateMockUsers = (count: number) => {
     name: `User ${i + 1}`,
     email: `user${i + 1}@example.com`,
     status: statuses[Math.floor(Math.random() * statuses.length)],
-    joinedDate: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toLocaleDateString(),
+    joinedDate: new Date(
+      2024,
+      Math.floor(Math.random() * 12),
+      Math.floor(Math.random() * 28) + 1
+    ).toLocaleDateString(),
     coins: Math.floor(Math.random() * 10000),
     totalSpent: Math.floor(Math.random() * 50000)
   }));
@@ -117,3 +121,38 @@ export const generateEarningsData = () => {
     { name: 'Streamer 5', earnings: 25000 }
   ];
 };
+
+export const mockWithdrawRequests = [
+  {
+    id: "WR-001",
+    user: "User 1",
+    method: "Bank Transfer",
+    amount: 2500,
+    date: "2024-11-10",
+    status: "pending",
+  },
+  {
+    id: "WR-002",
+    user: "User 2",
+    method: "UPI",
+    amount: 1500,
+    date: "2024-11-12",
+    status: "approved",
+  },
+  {
+    id: "WR-003",
+    user: "User 3",
+    method: "Bank Transfer",
+    amount: 4200,
+    date: "2024-11-14",
+    status: "rejected",
+  },
+  {
+    id: "WR-004",
+    user: "User 4",
+    method: "UPI",
+    amount: 5200,
+    date: "2024-11-15",
+    status: "pending",
+  },
+];

@@ -1,131 +1,365 @@
-import { useState } from 'react';
-import Card from '../components/Card';
-import Table from '../components/Table';
-import Button from '../components/Button';
-import Input from '../components/Input';
-import Modal from '../components/Modal';
-import Tabs from '../components/Tabs';
-import { Plus, Edit, Trash2, CheckCircle, XCircle, DollarSign, Coins as CoinsIcon } from 'lucide-react';
-import { generateMockCoinPackages, generateMockGifts, generateMockWithdrawals } from '../utils/mockData';
+
+
+
+import { useState } from "react";
+import Card from "../components/Card";
+import Button from "../components/Button";
+import Input from "../components/Input";
+import Modal from "../components/Modal";
+import Tabs from "../components/Tabs";
+import { Plus, Edit, Trash2, Coins as CoinsIcon, Coins } from "lucide-react";
+import { generateMockCoinPackages, generateMockGifts } from "../utils/mockData";
 
 export default function Revenue() {
+  // ---------------- Modal States ----------------
   const [isCoinModalOpen, setIsCoinModalOpen] = useState(false);
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
-  const [isWithdrawalModalOpen, setIsWithdrawalModalOpen] = useState(false);
-  const [selectedWithdrawal, setSelectedWithdrawal] = useState<ReturnType<typeof generateMockWithdrawals>[0] | null>(null);
-  const [platformFee, setPlatformFee] = useState('30');
-  const [hostFee, setHostFee] = useState('70');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
+  const [isEntryEffectModalOpen, setIsEntryEffectModalOpen] = useState(false);
+  const [isEditGiftModalOpen, setIsEditGiftModalOpen] = useState(false);
+  const [isDeleteGiftModalOpen, setIsDeleteGiftModalOpen] = useState(false);
+
+  // ---------------- Selected Items ----------------
+  const [selectedGift, setSelectedGift] = useState<any>(null);
+  const [selectedPackage, setSelectedPackage] = useState<any>(null);
+
+  // ---------------- Fee Inputs ----------------
+  const [platformFee, setPlatformFee] = useState("30");
+  const [hostFee, setHostFee] = useState("70");
+
+  // ---------------- Mock Data ----------------
   const mockCoinPackages = generateMockCoinPackages();
   const mockGifts = generateMockGifts();
-  const mockWithdrawals = generateMockWithdrawals(25);
 
-  const withdrawalColumns = [
-    { key: 'id', label: 'Request ID' },
-    { key: 'streamerName', label: 'Streamer Name' },
-    {
-      key: 'amount',
-      label: 'Amount',
-      render: (value: unknown) => `$${(value as number).toLocaleString()}`
-    },
-    {
-      key: 'tds',
-      label: 'TDS',
-      render: (value: unknown) => `$${(value as number).toLocaleString()}`
-    },
-    {
-      key: 'finalPayout',
-      label: 'Final Payout',
-      render: (value: unknown) => (
-        <span className="font-semibold text-green-600">
-          ${(value as number).toLocaleString()}
-        </span>
-      )
-    },
-    {
-      key: 'status',
-      label: 'Status',
-      render: (value: unknown) => {
-        const status = value as string;
-        const colors = {
-          pending: 'bg-yellow-100 text-yellow-800',
-          approved: 'bg-green-100 text-green-800',
-          rejected: 'bg-red-100 text-red-800'
-        };
-        return (
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status as keyof typeof colors]}`}>
-            {status}
-          </span>
-        );
-      }
-    },
-    { key: 'requestDate', label: 'Request Date' },
-    {
-      key: 'actions',
-      label: 'Actions',
-      render: (_: unknown, row: Record<string, unknown>) => (
-        <div className="flex gap-2">
-          {row.status === 'pending' && (
-            <>
-              <Button
-                size="sm"
-                variant="success"
-                onClick={() => {
-                  setSelectedWithdrawal(row as ReturnType<typeof generateMockWithdrawals>[0]);
-                  setIsWithdrawalModalOpen(true);
-                }}
-              >
-                <CheckCircle size={14} />
-              </Button>
-              <Button size="sm" variant="danger">
-                <XCircle size={14} />
-              </Button>
-            </>
-          )}
-        </div>
-      )
+  // ---------------- Gift Management ----------------
+  const [gifts, setGifts] = useState(mockGifts);
+  const [newGiftName, setNewGiftName] = useState("");
+  const [newGiftPrice, setNewGiftPrice] = useState("");
+  const [newGiftIcon, setNewGiftIcon] = useState("");
+
+  // ---------------- Coin Packages ----------------
+  const [coinPackages, setCoinPackages] = useState(mockCoinPackages || []);
+  const [newPackage, setNewPackage] = useState("");
+  const [editPackage, setEditPackage] = useState("");
+
+  const [newCoinCount, setNewCoinCount] = useState("");
+  const [newCoinPrice, setNewCoinPrice] = useState("");
+  const [editCoinCount, setEditCoinCount] = useState("");
+  const [editCoinPrice, setEditCoinPrice] = useState("");
+
+  // ---------------- Entry Effects ----------------
+  const [entryEffects, setEntryEffects] = useState<any[]>([]);
+  const [isEditEntryEffectModalOpen, setIsEditEntryEffectModalOpen] = useState(false);
+  const [isDeleteEntryEffectModalOpen, setIsDeleteEntryEffectModalOpen] = useState(false);
+
+  const [newEffectFile, setNewEffectFile] = useState<File | null>(null);
+  const [newEffectPreview, setNewEffectPreview] = useState("");
+
+  const [newEffectName, setNewEffectName] = useState("");
+
+  const [selectedEffect, setSelectedEffect] = useState<any>(null);
+
+  const [newEffectCoins,setNewEffectCoins] = useState("");
+
+  const[newEffectImagePreview,setNewEffectImagePreview] = useState(null);
+
+  // ---------------- Entry Effect Functions ----------------
+  const handleAddEntryEffect = () => {
+    if (!newEffectName || !newEffectFile) {
+      alert("Please provide both a name and an animation file!");
+      return;
     }
-  ];
 
+    const newEffect = {
+      id: Date.now(),
+      name: newEffectName,
+      fileName: newEffectFile.name,
+      coins: Number(newEffectCoins),
+      fileUrl: URL.createObjectURL(newEffectFile),
+    };
+
+    setEntryEffects([...entryEffects, newEffect]);
+    setNewEffectName("");
+    setNewEffectFile(null);
+    setSelectedEffect("")
+    setNewEffectPreview("");
+    setIsEntryEffectModalOpen(false);
+  };
+
+  const handleSaveEntryEffectEdit = () => {
+    if (!selectedEffect) return;
+
+    setEntryEffects((prev) =>
+      prev.map((efe) => (efe.id === selectedEffect.id ? selectedEffect : efe))
+    );
+
+    setIsEditEntryEffectModalOpen(false);
+    setSelectedEffect(null);
+  };
+
+  const handleDeleteEntryEffect = (id: number) => {
+    setEntryEffects((prev) => prev.filter((efe) => efe.id !== id));
+    setIsDeleteEntryEffectModalOpen(false);
+  };
+
+  // ---------------- Coin Package Functions ----------------
+  const handleAddPackage = () => {
+    // validation
+    if (!newPackage || !newCoinCount || !newCoinPrice) {
+      return alert("Please select a package and fill coins & price.");
+    }
+
+    const newPkgObj = {
+      id: Date.now(),
+      package: newPackage,
+      coins: Number(newCoinCount),
+      price: Number(newCoinPrice),
+    };
+
+    setCoinPackages((prev) => [...prev, newPkgObj]);
+
+    // reset fields
+    setNewPackage("");
+    setNewCoinCount("");
+    setNewCoinPrice("");
+    setIsCoinModalOpen(false);
+  };
+
+  const handleEditOpen = (pkg: any) => {
+    setSelectedPackage(pkg);
+    setEditCoinCount(String(pkg.coins ?? ""));
+    setEditCoinPrice(String(pkg.price ?? ""));
+    setEditPackage(pkg.package ?? "");
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (!selectedPackage) return;
+
+    setCoinPackages((prev) =>
+      prev.map((p) =>
+        p.id === selectedPackage.id
+          ? {
+              ...p,
+              package: editPackage,
+              coins: Number(editCoinCount),
+              price: Number(editCoinPrice),
+            }
+          : p
+      )
+    );
+
+    // reset edit state
+    setSelectedPackage(null);
+    setEditPackage("");
+    setEditCoinCount("");
+    setEditCoinPrice("");
+    setIsEditModalOpen(false);
+  };
+
+  const handleDeletePackage = () => {
+    if (!selectedPackage) return;
+    setCoinPackages((prev) => prev.filter((p) => p.id !== selectedPackage.id));
+    setSelectedPackage(null);
+    setIsDeleteModalOpen(false);
+  };
+
+  // ---------------- Gift Functions ----------------
+  const openEditModal = (item: any) => {
+    setSelectedGift(item);
+    setIsEditGiftModalOpen(true);
+  };
+
+  const openDeleteModal = (item: any) => {
+    setSelectedGift(item);
+    setIsDeleteGiftModalOpen(true);
+  };
+
+  const handleAddGift = () => {
+    if (!newGiftName || !newGiftPrice) return alert("Please provide gift name & price");
+
+    const newGift = {
+      id: Date.now(),
+      name: newGiftName,
+      price: Number(newGiftPrice),
+      icon: newGiftIcon || "🎁",
+      animation: "Default",
+    };
+
+    setGifts((prev) => [...prev, newGift]);
+    setNewGiftName("");
+    setNewGiftPrice("");
+    setNewGiftIcon("");
+    setIsGiftModalOpen(false);
+  };
+
+  const handleSaveGiftEdit = () => {
+    if (selectedGift) {
+      setGifts((prev) => prev.map((gift) => (gift.id === selectedGift.id ? selectedGift : gift)));
+      setIsEditGiftModalOpen(false);
+      setSelectedGift(null);
+    }
+  };
+
+  const handleDeleteGift = () => {
+    if (selectedGift) {
+      setGifts((prev) => prev.filter((gift) => gift.id !== selectedGift.id));
+      setIsDeleteGiftModalOpen(false);
+      setSelectedGift(null);
+    }
+  };
+
+  // ---------------- Tabs content ----------------
   const coinsTab = (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <p className="text-gray-600">Manage coin packages and pricing</p>
-        <Button variant="primary" onClick={() => setIsCoinModalOpen(true)}>
+        <Button variant="primary" className="flex items-center" onClick={() => setIsCoinModalOpen(true)}>
           <Plus size={18} className="mr-2" />
           Add Package
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {mockCoinPackages.map((pkg) => (
-          <Card key={pkg.id} className={pkg.popular ? 'ring-2 ring-blue-500' : ''}>
-            <div className="text-center">
-              {pkg.popular && (
-                <span className="inline-block px-2 py-1 bg-blue-500 text-white text-xs font-medium rounded-full mb-2">
-                  Popular
-                </span>
-              )}
-              <div className="text-4xl mb-2">
-                <CoinsIcon className="mx-auto text-yellow-500" size={48} />
-              </div>
-              <p className="text-3xl font-bold text-gray-900">{pkg.coins}</p>
-              <p className="text-sm text-gray-600 mb-4">Coins</p>
-              <p className="text-2xl font-bold text-blue-600 mb-4">
-                ${pkg.price}
-              </p>
-              <div className="flex gap-2">
-                <Button size="sm" variant="secondary" className="flex-1">
-                  <Edit size={14} />
-                </Button>
-                <Button size="sm" variant="danger">
-                  <Trash2 size={14} />
-                </Button>
-              </div>
+      {/* Packages Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 p-6">
+        {coinPackages.map((pkg: any) => (
+          <Card key={pkg.id} className="p-6 text-center rounded-3xl shadow-md hover:shadow-lg transition-all duration-200">
+            {/* Package Badge */}
+            {pkg.package && <p className="text-sm text-blue-700 font-semibold mb-2">{pkg.package}</p>}
+
+            <div className="flex flex-col items-center mb-4">
+              <CoinsIcon className="text-yellow-500 mb-3" size={30} />
+              <h2 className="text-3xl font-bold text-gray-900">{pkg.coins}</h2>
+              <p className="text-sm text-gray-600">Coins</p>
+            </div>
+
+            <p className="text-2xl font-bold text-blue-600 mb-5">₹{pkg.price}</p>
+
+            <div className="flex items-center justify-center gap-3 mt-auto">
+              <Button size="sm" variant="secondary" onClick={() => handleEditOpen(pkg)}>
+                <Edit size={14} />
+              </Button>
+              <Button
+                size="sm"
+                variant="danger"
+                onClick={() => {
+                  setSelectedPackage(pkg);
+                  setIsDeleteModalOpen(true);
+                }}
+              >
+                <Trash2 size={14} />
+              </Button>
             </div>
           </Card>
         ))}
       </div>
+
+      {/* Add Coin Modal */}
+      <Modal isOpen={isCoinModalOpen} onClose={() => setIsCoinModalOpen(false)} title="Add Coin Package">
+        <div className="space-y-4">
+          {/* Package Dropdown */}
+          <label className="block">
+            <span className="text-gray-700 font-medium">Package</span>
+            <select className="mt-1 block w-full border rounded-lg p-2" value={newPackage} onChange={(e) => setNewPackage(e.target.value)}>
+              <option value="">Select a package</option>
+              <option value="Basic Pack">Basic Pack</option>
+              <option value="Silver Pack">Silver Pack</option>
+              <option value="Gold Pack">Gold Pack</option>
+              <option value="Premium Pack">Premium Pack</option>
+            </select>
+          </label>
+
+          <label className="block">
+            <span className="text-gray-700 font-medium">Coins</span>
+            <input
+              type="number"
+              className="mt-1 block w-full border rounded-lg p-2"
+              placeholder="Enter number of coins"
+              value={newCoinCount}
+              onChange={(e) => setNewCoinCount(e.target.value)}
+            />
+          </label>
+
+          <label className="block">
+            <span className="text-gray-700 font-medium">Price (₹)</span>
+            <input
+              type="number"
+              className="mt-1 block w-full border rounded-lg p-2"
+              placeholder="Enter price"
+              value={newCoinPrice}
+              onChange={(e) => setNewCoinPrice(e.target.value)}
+            />
+          </label>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg" onClick={() => setIsCoinModalOpen(false)}>
+              Cancel
+            </Button>
+
+            <Button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700" onClick={handleAddPackage}>
+              Add Package
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Edit Coin Package Modal */}
+      <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Edit Coin Package">
+        {selectedPackage && (
+          <div className="space-y-4">
+            {/* Package Dropdown */}
+            <label className="block">
+              <span className="text-gray-700 font-medium">Package</span>
+              <select className="mt-1 block w-full border rounded-lg p-2" value={editPackage} onChange={(e) => setEditPackage(e.target.value)}>
+                <option value="">Select a package</option>
+                <option value="Basic Pack">Basic Pack</option>
+                <option value="Silver Pack">Silver Pack</option>
+                <option value="Gold Pack">Gold Pack</option>
+                <option value="Premium Pack">Premium Pack</option>
+              </select>
+            </label>
+
+            <label className="block">
+              <span className="text-gray-700 font-medium">Coins</span>
+              <input type="number" className="mt-1 block w-full border rounded-lg p-2" value={editCoinCount} onChange={(e) => setEditCoinCount(e.target.value)} />
+            </label>
+
+            <label className="block">
+              <span className="text-gray-700 font-medium">Price (₹)</span>
+              <input type="number" className="mt-1 block w-full border rounded-lg p-2" value={editCoinPrice} onChange={(e) => setEditCoinPrice(e.target.value)} />
+            </label>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg" onClick={() => setIsEditModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" onClick={handleSaveEdit}>
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Delete Modal */}
+      <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} title="Delete Coin Package">
+        <div className="text-center space-y-4">
+          <p className="text-gray-700">
+            Are you sure you want to delete the <strong>{selectedPackage?.coins}</strong> coins package?
+          </p>
+
+          <div className="flex justify-center gap-3">
+            <Button className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg" onClick={() => setIsDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700" onClick={handleDeletePackage}>
+              Delete
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 
@@ -133,97 +367,154 @@ export default function Revenue() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <p className="text-gray-600">Manage gift items and animations</p>
-        <Button variant="primary" onClick={() => setIsGiftModalOpen(true)}>
-          <Plus size={18} className="mr-2" />
-          Add Gift
+        <Button variant="primary" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-3xl hover:bg-blue-700" onClick={() => setIsGiftModalOpen(true)}>
+          <Plus size={18} /> Add Gift
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {mockGifts.map((gift) => (
-          <Card key={gift.id}>
-            <div className="text-center">
-              <div className="text-5xl mb-3">{gift.icon}</div>
-              <p className="font-semibold text-gray-900 mb-1">{gift.name}</p>
-              <p className="text-sm text-gray-600 mb-2">Animation: {gift.animation}</p>
-              <p className="text-lg font-bold text-blue-600 mb-4">
-                {gift.price} coins
-              </p>
-              <div className="flex gap-2">
-                <Button size="sm" variant="secondary" className="flex-1">
-                  <Edit size={14} />
-                </Button>
-                <Button size="sm" variant="danger">
-                  <Trash2 size={14} />
-                </Button>
-              </div>
+      {/* Gift Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        {gifts.map((gift) => (
+          <Card key={gift.id} className="p-6 text-center rounded-3xl shadow-md hover:shadow-lg transition-all duration-200">
+            <div className="text-5xl mb-3">{gift.icon}</div>
+            <p className="font-semibold text-gray-900 mb-1">{gift.name}</p>
+            <p className="text-sm text-gray-600 mb-2">Animation: {gift.animation}</p>
+            <p className="text-lg font-bold text-blue-600 mb-4">{gift.price} coins</p>
+
+            <div className="flex gap-2 justify-center">
+              <Button size="sm" variant="secondary" onClick={() => { setSelectedGift({ ...gift }); setIsEditGiftModalOpen(true); }}>
+                <Edit size={14} />
+              </Button>
+              <Button size="sm" variant="danger" onClick={() => { setSelectedGift(gift); setIsDeleteGiftModalOpen(true); }}>
+                <Trash2 size={14} />
+              </Button>
             </div>
           </Card>
         ))}
       </div>
+
+      {/* Add Gift Modal */}
+      <Modal isOpen={isGiftModalOpen} onClose={() => setIsGiftModalOpen(false)} title="Add New Gift">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Upload Gift Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              className="w-full border border-gray-300 rounded-lg p-2"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onloadend = () => setNewGiftIcon(reader.result as string);
+                  reader.readAsDataURL(file);
+                }
+              }}
+            />
+
+            {newGiftIcon && (
+              <div className="mt-3 flex justify-center">
+                <img src={newGiftIcon} alt="Gift Preview" className="w-20 h-20 object-cover rounded-lg border" />
+              </div>
+            )}
+          </div>
+
+          <label className="block">
+            <span className="text-gray-700 font-medium">Gift Name</span>
+            <input type="text" className="mt-1 block w-full border rounded-lg p-2" placeholder="Enter gift name" value={newGiftName} onChange={(e) => setNewGiftName(e.target.value)} />
+          </label>
+
+          <label className="block">
+            <span className="text-gray-700 font-medium">Price (coins)</span>
+            <input type="number" className="mt-1 block w-full border rounded-lg p-2" placeholder="Enter price" value={newGiftPrice} onChange={(e) => setNewGiftPrice(e.target.value)} />
+          </label>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg" onClick={() => setIsGiftModalOpen(false)}>Cancel</Button>
+            <Button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700" onClick={handleAddGift}>Add Gift</Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Edit Gift Modal */}
+      <Modal isOpen={isEditGiftModalOpen} onClose={() => setIsEditGiftModalOpen(false)} title="Edit Gift">
+        {selectedGift && (
+          <div className="space-y-4">
+            <label className="block">
+              <span className="text-gray-700 font-medium">Gift Icon / Image</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const imageUrl = URL.createObjectURL(file);
+                    setSelectedGift({ ...selectedGift, icon: imageUrl });
+                  }
+                }}
+                className="mt-1 block w-full border rounded-lg p-2"
+              />
+            </label>
+
+            {selectedGift.icon && (
+              <div className="mt-3 flex justify-center">
+                <img src={selectedGift.icon} alt="" className="max-w-[100px] max-h-[100px] rounded-lg" />
+              </div>
+            )}
+
+            <label className="block">
+              <span className="text-gray-700 font-medium">Gift Name</span>
+              <input type="text" value={selectedGift.name} onChange={(e) => setSelectedGift({ ...selectedGift, name: e.target.value })} className="mt-1 block w-full border rounded-lg p-2" />
+            </label>
+
+            <label className="block">
+              <span className="text-gray-700 font-medium">Price (coins)</span>
+              <input type="number" value={selectedGift.price} onChange={(e) => setSelectedGift({ ...selectedGift, price: Number(e.target.value) })} className="mt-1 block w-full border rounded-lg p-2" />
+            </label>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg" onClick={() => setIsEditGiftModalOpen(false)}>Cancel</Button>
+              <Button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" onClick={handleSaveGiftEdit}>Save Changes</Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Delete Gift Modal */}
+      <Modal isOpen={isDeleteGiftModalOpen} onClose={() => setIsDeleteGiftModalOpen(false)} title="Delete Gift">
+        <div className="text-center space-y-4">
+          <p className="text-gray-700">
+            Are you sure you want to delete the gift <strong>{selectedGift?.name}</strong>?
+          </p>
+
+          <div className="flex justify-center gap-3">
+            <Button className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg" onClick={() => setIsDeleteGiftModalOpen(false)}>Cancel</Button>
+            <Button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700" onClick={handleDeleteGift}>Delete</Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 
+  // feesTab and entryEffectsTab (kept mostly as in your original — trimmed for brevity)
   const feesTab = (
     <div className="space-y-6">
       <Card title="Platform & Host Fee Settings">
         <div className="space-y-6">
-          <div>
-            <p className="text-gray-700 mb-4">
-              Configure the revenue split between the platform and streamers. Total must equal 100%.
-            </p>
-          </div>
+          <p className="text-gray-700 mb-4">Configure the revenue split between the platform and streamers. Total must equal 100%.</p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="p-6 bg-blue-50 rounded-lg">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Platform Fee (%)
-              </label>
-              <Input
-                type="number"
-                value={platformFee}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value) || 0;
-                  setPlatformFee(val.toString());
-                  setHostFee((100 - val).toString());
-                }}
-                min="0"
-                max="100"
-              />
-              <p className="text-sm text-gray-600 mt-2">
-                The percentage that goes to the platform
-              </p>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Platform Fee (%)</label>
+              <Input type="number" value={platformFee} onChange={(e) => { const val = parseInt(e.target.value) || 0; setPlatformFee(val.toString()); setHostFee((100 - val).toString()); }} min="0" max="100" />
+              <p className="text-sm text-gray-600 mt-2">The percentage that goes to the platform</p>
             </div>
 
             <div className="p-6 bg-green-50 rounded-lg">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Host Fee (%)
-              </label>
-              <Input
-                type="number"
-                value={hostFee}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value) || 0;
-                  setHostFee(val.toString());
-                  setPlatformFee((100 - val).toString());
-                }}
-                min="0"
-                max="100"
-              />
-              <p className="text-sm text-gray-600 mt-2">
-                The percentage that goes to the streamer
-              </p>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Host Fee (%)</label>
+              <Input type="number" value={hostFee} onChange={(e) => { const val = parseInt(e.target.value) || 0; setHostFee(val.toString()); setPlatformFee((100 - val).toString()); }} min="0" max="100" />
+              <p className="text-sm text-gray-600 mt-2">The percentage that goes to the streamer</p>
             </div>
-          </div>
-
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-700">
-              <strong>Example:</strong> If a user sends a gift worth 100 coins:
-            </p>
-            <ul className="mt-2 space-y-1 text-sm text-gray-700">
-              <li>Platform receives: {platformFee} coins</li>
-              <li>Streamer receives: {hostFee} coins</li>
-            </ul>
           </div>
 
           <Button variant="primary">Save Fee Settings</Button>
@@ -231,173 +522,272 @@ export default function Revenue() {
       </Card>
     </div>
   );
-
-  const withdrawalsTab = (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Pending Requests</p>
-              <p className="text-2xl font-bold text-yellow-600">
-                {mockWithdrawals.filter(w => w.status === 'pending').length}
-              </p>
-            </div>
-            <DollarSign className="text-yellow-600" size={32} />
-          </div>
-        </Card>
-
-        <Card>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Approved Today</p>
-              <p className="text-2xl font-bold text-green-600">8</p>
-            </div>
-            <CheckCircle className="text-green-600" size={32} />
-          </div>
-        </Card>
-
-        <Card>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Total Amount</p>
-              <p className="text-2xl font-bold text-gray-900">$142,000</p>
-            </div>
-            <CoinsIcon className="text-blue-600" size={32} />
-          </div>
-        </Card>
-      </div>
-
-      <Card>
-        <Table columns={withdrawalColumns} data={mockWithdrawals.slice(0, 10)} />
-      </Card>
+const entryEffectsTab = (
+  <div className="space-y-6">
+    <div className="flex justify-between items-center">
+      <p className="text-gray-600">Manage Entry Effects</p>
+      <Button
+        variant="primary"
+        className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-3xl hover:bg-blue-700"
+        onClick={() => setIsEntryEffectModalOpen(true)}
+      >
+        <Plus size={18} /> Add Effect
+      </Button>
     </div>
-  );
 
+    {/* Grid Card View */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+      {entryEffects.map((effect) => (
+        <Card
+          key={effect.id}
+          className="p-6 text-center rounded-3xl shadow-md hover:shadow-lg transition-all duration-200"
+        >
+          {/* Preview Video or Image */}
+          {effect.fileUrl && (
+            <div className="mb-3">
+              {effect.fileUrl.endsWith(".mp4") ||
+
+              effect.fileUrl.endsWith(".mov") ||
+              effect.fileUrl.endsWith(".webm") ? (
+                <video
+                  src={effect.fileUrl}
+                  className="w-20 h-20 object-cover rounded-lg mx-auto"
+                  autoPlay
+                  loop
+                  muted
+                />
+              ) : (
+                <img
+                  src={effect.fileUrl}
+                  className="w-20 h-20 object-cover rounded-lg mx-auto"
+                />
+              )}
+            </div>
+          )}
+
+          <p className="font-semibold text-gray-900 mb-1">{effect.name}</p>
+          <p className="text-sm text-gray-600">{effect.fileName}</p>
+          <p className="text-sm font-bold text-green-700 mt-2">
+            {effect.coins} Coins
+          </p>
+
+          <div className="flex gap-2 justify-center mt-4">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => {
+                setSelectedEffect({ ...effect });
+                setIsEditEntryEffectModalOpen(true);
+              }}
+            >
+              <Edit size={14} />
+            </Button>
+
+            <Button
+              size="sm"
+              variant="danger"
+              onClick={() => {
+                setSelectedEffect(effect);
+                setIsDeleteEntryEffectModalOpen(true);
+              }}
+            >
+              <Trash2 size={14} />
+            </Button>
+          </div>
+        </Card>
+      ))}
+    </div>
+
+    {/* ------------------------- ADD ENTRY EFFECT MODAL ------------------------- */}
+    <Modal
+      isOpen={isEntryEffectModalOpen}
+      onClose={() => setIsEntryEffectModalOpen(false)}
+      title="Add Entry Effect"
+    >
+      <div className="space-y-4">
+
+        <Input
+          label="Effect Name"
+          placeholder="Enter effect name"
+          value={newEffectName}
+          onChange={(e) => setNewEffectName(e.target.value)}
+        />
+
+        <Input
+          label="Effect Coins"
+          placeholder="Enter price"
+          type="number"
+          value={newEffectCoins}
+          onChange={(e) => setNewEffectCoins(e.target.value)}
+        />
+
+        <Input
+          label="Upload File (Image / Video)"
+          type="file"
+          accept="image/*, video/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0] || null;
+            setNewEffectFile(file);
+            if (file) {
+              const previewURL = URL.createObjectURL(file);
+              setNewEffectPreview(previewURL);
+            }
+          }}
+        />
+
+        {/* Preview Uploaded File */}
+        {newEffectPreview && (
+          <>
+            {newEffectPreview.includes("video") ||
+            newEffectPreview.endsWith(".mp4") ||
+            newEffectPreview.endsWith(".webm") ? (
+              <video
+                src={newEffectPreview}
+                className="w-24 h-24 mx-auto rounded-lg"
+                autoPlay
+                loop
+                muted
+              />
+            ) : (
+              <img
+                src={newEffectPreview}
+                className="w-24 h-24 mx-auto rounded-lg object-cover"
+              />
+            )}
+          </>
+        )}
+
+        <Button variant="primary" onClick={handleAddEntryEffect} className="w-full">
+          Add Effect
+        </Button>
+
+      </div>
+    </Modal>
+
+    {/* ------------------------- EDIT ENTRY EFFECT MODAL ------------------------- */}
+    <Modal
+      isOpen={isEditEntryEffectModalOpen}
+      onClose={() => setIsEditEntryEffectModalOpen(false)}
+      title="Edit Entry Effect"
+    >
+      {selectedEffect && (
+        <div className="space-y-4">
+
+          <Input
+            label="Effect Name"
+            value={selectedEffect.name}
+            onChange={(e) =>
+              setSelectedEffect({ ...selectedEffect, name: e.target.value })
+            }
+          />
+
+          <Input
+            label="Price (₹)"
+            type="number"
+            value={selectedEffect.price}
+            onChange={(e) =>
+              setSelectedEffect({ ...selectedEffect, price: e.target.value })
+            }
+          />
+
+          <Input
+            label="Replace Image / Video"
+            type="file"
+            accept="image/*, video/*"
+            onChange={(e) => {
+              const newFile = e.target.files?.[0] || null;
+              if (newFile) {
+                setSelectedEffect({
+                  ...selectedEffect,
+                  fileName: newFile.name,
+                  fileUrl: URL.createObjectURL(newFile),
+                });
+              }
+            }}
+          />
+
+          {/* Preview */}
+          {selectedEffect.fileUrl && (
+            <>
+              {selectedEffect.fileUrl.endsWith(".mp4") ||
+              selectedEffect.fileUrl.endsWith(".mov") ? (
+                <video
+                  src={selectedEffect.fileUrl}
+                  className="w-24 h-24 mx-auto"
+                  autoPlay
+                  loop
+                  muted
+                />
+              ) : (
+                <img
+                  src={selectedEffect.fileUrl}
+                  className="w-24 h-24 mx-auto rounded-lg"
+                />
+              )}
+            </>
+          )}
+
+          <Button
+            variant="primary"
+            onClick={handleSaveEntryEffectEdit}
+            className="w-full"
+          >
+            Save Changes
+          </Button>
+
+        </div>
+      )}
+    </Modal>
+
+    {/* ------------------------- DELETE ENTRY EFFECT MODAL ------------------------- */}
+    <Modal
+      isOpen={isDeleteEntryEffectModalOpen}
+      onClose={() => setIsDeleteEntryEffectModalOpen(false)}
+      title="Delete Entry Effect"
+    >
+      <p className="text-gray-700">
+        Are you sure you want to delete{" "}
+        <strong>{selectedEffect?.name}</strong>?
+      </p>
+
+      <div className="flex gap-4 mt-4">
+        <Button
+          variant="danger"
+          className="flex-1"
+          onClick={() => handleDeleteEntryEffect(selectedEffect.id)}
+        >
+          Delete
+        </Button>
+        <Button
+          variant="secondary"
+          className="flex-1"
+          onClick={() => setIsDeleteEntryEffectModalOpen(false)}
+        >
+          Cancel
+        </Button>
+      </div>
+    </Modal>
+  </div>
+);
+
+
+
+  // -------------------- Return --------------------
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Coins & Revenue Management</h1>
-        <p className="text-gray-600 mt-1">Manage coin packages, gifts, and withdrawal requests</p>
+        <p className="text-gray-600 mt-1">Manage coin packages, gifts, withdrawal requests, and entry effects</p>
       </div>
 
       <Tabs
         tabs={[
-          { key: 'coins', label: 'Coin Packages', content: coinsTab },
-          { key: 'gifts', label: 'Gifts', content: giftsTab },
-          { key: 'fees', label: 'Platform Fees', content: feesTab },
-          { key: 'withdrawals', label: 'Withdrawal Requests', content: withdrawalsTab }
+          { key: "coins", label: "Coin Packages", content: coinsTab },
+          { key: "gifts", label: "Gifts", content: giftsTab },
+          { key: "fees", label: "Platform Fees", content: feesTab },
+          { key: "entryEffects", label: "Entry Effects", content: entryEffectsTab },
         ]}
       />
-
-      <Modal
-        isOpen={isCoinModalOpen}
-        onClose={() => setIsCoinModalOpen(false)}
-        title="Add Coin Package"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setIsCoinModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="primary">Create Package</Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          <Input label="Number of Coins" type="number" placeholder="1000" />
-          <Input label="Price (USD)" type="number" placeholder="9.99" step="0.01" />
-          <label className="flex items-center gap-2">
-            <input type="checkbox" className="rounded" />
-            <span className="text-sm">Mark as Popular</span>
-          </label>
-        </div>
-      </Modal>
-
-      <Modal
-        isOpen={isGiftModalOpen}
-        onClose={() => setIsGiftModalOpen(false)}
-        title="Add Gift"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setIsGiftModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="primary">Create Gift</Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          <Input label="Gift Name" placeholder="Diamond Ring" />
-          <Input label="Price (Coins)" type="number" placeholder="100" />
-          <Input label="Icon/Emoji" placeholder="💍" />
-          <Input label="Animation Type" placeholder="sparkle" />
-        </div>
-      </Modal>
-
-      <Modal
-        isOpen={isWithdrawalModalOpen}
-        onClose={() => setIsWithdrawalModalOpen(false)}
-        title="Approve Withdrawal Request"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setIsWithdrawalModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="success">Approve & Process</Button>
-          </>
-        }
-      >
-        {selectedWithdrawal && (
-          <div className="space-y-4">
-            <div className="p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-gray-700 mb-4">
-                Please review the withdrawal details before approving:
-              </p>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Streamer:</span>
-                  <span className="font-medium">{selectedWithdrawal.streamerName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Gross Amount:</span>
-                  <span className="font-medium">${selectedWithdrawal.amount.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">TDS Deducted:</span>
-                  <span className="font-medium text-red-600">-${selectedWithdrawal.tds.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between pt-2 border-t border-gray-300">
-                  <span className="font-semibold">Final Payout:</span>
-                  <span className="font-bold text-green-600 text-lg">
-                    ${selectedWithdrawal.finalPayout.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <p className="text-sm font-medium text-gray-700 mb-2">Bank Details:</p>
-              <div className="p-4 bg-gray-50 rounded-lg space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Account Number:</span>
-                  <span className="font-mono">{selectedWithdrawal.bankDetails.accountNumber}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">IFSC Code:</span>
-                  <span className="font-mono">{selectedWithdrawal.bankDetails.ifsc}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-yellow-50 rounded-lg">
-              <p className="text-sm text-yellow-800">
-                <strong>Note:</strong> Once approved, the payment will be processed within 2-3 business days.
-                Make sure all details are verified before proceeding.
-              </p>
-            </div>
-          </div>
-        )}
-      </Modal>
     </div>
   );
 }

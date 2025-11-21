@@ -17,7 +17,7 @@ import {
   Legend
 } from 'recharts';
 import { generateRevenueData, generateEarningsData } from '../utils/mockData';
-import { TrendingUp, Users, DollarSign, Gift } from 'lucide-react';
+import { TrendingUp, Users, DollarSign, Gift, IndianRupee } from 'lucide-react';
 
 export default function Reports() {
   const [timeRange, setTimeRange] = useState('30');
@@ -51,6 +51,7 @@ export default function Reports() {
           <h1 className="text-2xl font-bold text-gray-900">Reports & Analytics</h1>
           <p className="text-gray-600 mt-1">Detailed insights and performance metrics</p>
         </div>
+
         <Select
           options={[
             { value: '7', label: 'Last 7 Days' },
@@ -63,19 +64,20 @@ export default function Reports() {
         />
       </div>
 
+      {/* STAT CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-gray-900">$524,890</p>
+              <p className="text-2xl font-bold text-gray-900">₹524,890</p>
               <div className="flex items-center gap-1 text-green-600 text-sm mt-1">
                 <TrendingUp size={14} />
                 <span>+18.2%</span>
               </div>
             </div>
             <div className="p-3 bg-green-100 rounded-lg">
-              <DollarSign className="text-green-600" size={24} />
+              <IndianRupee className="text-green-600" size={24} />
             </div>
           </div>
         </Card>
@@ -129,6 +131,7 @@ export default function Reports() {
         </Card>
       </div>
 
+      {/* LINE CHARTS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card title="Daily Revenue (Last 30 Days)">
           <ResponsiveContainer width="100%" height={300}>
@@ -164,20 +167,29 @@ export default function Reports() {
         </Card>
       </div>
 
+      {/* PIE & EARNINGS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card title="Top Earning Streamers (This Month)">
           <div className="space-y-3">
             {earningsLeaderboard.map((streamer, index) => (
               <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white ${
-                    index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-400' : 'bg-blue-500'
-                  }`}>
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white ${
+                      index === 0
+                        ? 'bg-yellow-500'
+                        : index === 1
+                        ? 'bg-gray-400'
+                        : index === 2
+                        ? 'bg-orange-400'
+                        : 'bg-blue-500'
+                    }`}
+                  >
                     {index + 1}
                   </div>
                   <p className="font-medium text-gray-900">{streamer.name}</p>
                 </div>
-                <p className="font-bold text-gray-900">${streamer.earnings.toLocaleString()}</p>
+                <p className="font-bold text-gray-900">₹{streamer.earnings.toLocaleString()}</p>
               </div>
             ))}
           </div>
@@ -193,7 +205,6 @@ export default function Reports() {
                 labelLine={false}
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 outerRadius={100}
-                fill="#8884d8"
                 dataKey="value"
               >
                 {giftDistribution.map((entry, index) => (
@@ -206,6 +217,7 @@ export default function Reports() {
         </Card>
       </div>
 
+      {/* RETENTION & LOGS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card title="User Retention Rate">
           <ResponsiveContainer width="100%" height={300}>
@@ -227,7 +239,9 @@ export default function Reports() {
               to: `Streamer ${Math.floor(Math.random() * 30) + 1}`,
               gift: ['Heart', 'Rose', 'Diamond', 'Crown', 'Rocket'][Math.floor(Math.random() * 5)],
               coins: [10, 50, 100, 500, 1000][Math.floor(Math.random() * 5)],
-              time: `${Math.floor(Math.random() * 24)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`
+              time: `${Math.floor(Math.random() * 24)}:${Math.floor(Math.random() * 60)
+                .toString()
+                .padStart(2, '0')}`
             })).map((log) => (
               <div key={log.id} className="p-3 bg-gray-50 rounded-lg text-sm">
                 <div className="flex justify-between items-start">
