@@ -8,6 +8,7 @@ import Reports from '../pages/Reports';
 import Settings from '../pages/Settings';
 import AdminLogin from '../pages/AdminLogin';
 import WithdrawalRequests from '../pages/WithdrawalRequest';
+import ProtectedRoute from './ProtectedRoute';
 
 export const router = createBrowserRouter([
   {
@@ -16,8 +17,11 @@ export const router = createBrowserRouter([
   },
   {
     path: '/',
-    element: <MainLayout />,
-
+    element:
+    <ProtectedRoute>
+     <MainLayout />
+     </ProtectedRoute>,
+     
     children: [
       {
         index: true,
