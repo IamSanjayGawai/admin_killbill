@@ -25,8 +25,8 @@ export default function UserManagement() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   // TEMP DATA FOR EDIT MODAL INPUTS  
-  const [editName, setEditName] = useState("");
-  const [editEmail, setEditEmail] = useState("");
+  const [editfirstName, setfirstName] = useState("");
+  const [editlastName, setlastName] = useState("");
   const [editStatus, setEditStatus] = useState("active");
 
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
@@ -101,8 +101,8 @@ export default function UserManagement() {
             variant="secondary"
             onClick={() => {
               setSelectedUser(row);
-              setEditName(row.name);
-              setEditEmail(row.email);
+              setfirstName(row.name);
+              setlastName(row.name);
               setEditStatus(row.status);
               setIsEditModalOpen(true);
             }}
@@ -141,7 +141,7 @@ export default function UserManagement() {
       label: 'Actions',
       render: (_, row) => (
         <div className="flex gap-2">
-          <Button size="sm" variant="primary">Review</Button>
+          {/* <Button size="sm" variant="primary">Review</Button> */}
 
           <Button size="sm" variant="danger" onClick={()=>{setSelectedReport(row);
             setReportStatus(row.status);
@@ -163,8 +163,8 @@ export default function UserManagement() {
       u.id === editdUserId
         ? {
             ...u,
-            name: editName,
-            email: editEmail,
+            name: setfirstName,
+            email: setlastName,
             status: editStatus
           }
         : u
@@ -268,8 +268,8 @@ export default function UserManagement() {
       >
         {selectedUser && (
           <div className="space-y-4">
-            <Input label="Name" value={editName} onChange={(e) => setEditName(e.target.value)} />
-            <Input label="Email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
+            <Input label="FirstName" value={editfirstName} onChange={(e) => setfirstName(e.target.value)} />
+            <Input label="LastName" value={editlastName} onChange={(e) => setlastName(e.target.value)} />
                 </div>
         )}
       </Modal>
@@ -350,9 +350,9 @@ export default function UserManagement() {
         value={reportStatus}
         onChange={(e) => setReportStatus(e.target.value)}
         options={[
-          { value: "pending", label: "Pending" },
-          { value: "reviewed", label: "Reviewed" },
-          { value: "action_taken", label: "Action Taken" }
+          { value: "active", label: "Active" },
+          { value: "blocked", label: "Blocked" },
+          { value: "suspended", label: "Suspended" }
         ]}
       />
     </div>

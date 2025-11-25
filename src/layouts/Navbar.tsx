@@ -1,5 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Menu, Bell, User, LogOut } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
+
+
+
 
 interface NavbarProps {
   toggleSidebar: () => void;
@@ -7,6 +11,25 @@ interface NavbarProps {
 
 export default function Navbar({ toggleSidebar }: NavbarProps) {
   const [showDropdown, setShowDropdown] = useState(false);
+  const navigate = useNavigate();
+
+
+  const handleLogOut = () => {
+    // step 1 remove token from localStorage
+    localStorage.removeItem("adminToken");
+    // localStorage.removeItem("user");
+    setShowDropdown(false);
+    navigate("/login");
+  }
+
+//   useEffect(() => {
+   
+//     handleLogOut()      
+//   }
+// , [])
+  // ...
+
+
 
   return (
     <nav className="bg-white border-b border-gray-200 px-6 py-4">
@@ -45,7 +68,9 @@ export default function Navbar({ toggleSidebar }: NavbarProps) {
                   <User size={16} />
                   Profile
                 </button>
-                <button className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2">
+                <button
+                  onClick={handleLogOut}
+                  className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2">
                   <LogOut size={16} />
                   Logout
                 </button>
