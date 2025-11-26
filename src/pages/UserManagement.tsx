@@ -28,6 +28,7 @@ export default function UserManagement() {
   const [editfirstName, setfirstName] = useState("");
   const [editlastName, setlastName] = useState("");
   const [editStatus, setEditStatus] = useState("active");
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
 
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [selectedReport,setSelectedReport] = useState(null);
@@ -101,8 +102,9 @@ export default function UserManagement() {
             variant="secondary"
             onClick={() => {
               setSelectedUser(row);
-              setfirstName(row.name);
-              setlastName(row.name);
+              setEditingUserId(row.id);
+              setfirstName(row.firstName ?? row.name ?? "");
+              setlastName(row.lastName ?? "");
               setEditStatus(row.status);
               setIsEditModalOpen(true);
             }}
@@ -158,22 +160,35 @@ export default function UserManagement() {
   // ---------------------------------
   // HANDLE SAVE FROM EDIT MODAL
   // ---------------------------------
-  const handleSave = () => {
-    const updated = users.map((u) =>
-      u.id === editdUserId
-        ? {
-            ...u,
-            name: setfirstName,
-            email: setlastName,
-            status: editStatus
-          }
-        : u
-    
-    );
+  // const handleSave = () => {
+  //   if (!selectedUser) return;
+  
+  //   const updated = users.map((u) =>
+  //     u.id === selectedUser.id
+  //       ? {
+  //           ...u,
+  //           name: `${editfirstName} ${editlastName}`,
+  //           status: editStatus
+  //         }
+  //       : u
+  //   );
+  
+  //   setUsers(updated);
+  //   setIsEditModalOpen(false);
+  // };
 
-    setUsers(updated);
-    setIsEditModalOpen(false);
-  };
+  // And handleSave:
+const handleSave = () => {
+  if (!editingUserId) return;
+  const updated = users.map(u => 
+    u.id === editingUserId
+      ? { ...u, firstName: editfirstName, lastName: editlastName, status: editStatus }
+      : u
+  );
+  setUsers(updated);
+  setIsEditModalOpen(false);
+};
+  
 
   // ---------------------------------
   // USERS TAB
