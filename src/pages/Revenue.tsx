@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useEffect } from "react";
 import Card from "../components/Card";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import Modal from "../components/Modal";
 import Tabs from "../components/Tabs";
+import axios from "axios";
 import { Plus, Edit, Trash2, Coins as CoinsIcon, Coins } from "lucide-react";
 import { generateMockCoinPackages, generateMockGifts } from "../utils/mockData";
 
@@ -28,10 +30,12 @@ export default function Revenue() {
 
   // ---------------- Mock Data ----------------
   const mockCoinPackages = generateMockCoinPackages();
-  const mockGifts = generateMockGifts();
+  // const mockGifts = generateMockGifts();
 
   // ---------------- Gift Management ----------------
-  const [gifts, setGifts] = useState(mockGifts);
+  const [gifts, setGifts] = useState([]);
+  // const [gifts, setGifts] = useState<any[]>([]);
+
   const [newGiftName, setNewGiftName] = useState("");
   const [newGiftPrice, setNewGiftPrice] = useState("");
   const [newGiftIcon, setNewGiftIcon] = useState("");
@@ -55,6 +59,7 @@ export default function Revenue() {
   const [newEffectPreview, setNewEffectPreview] = useState("");
 
   const [newEffectName, setNewEffectName] = useState("");
+  const [newGiftIconFile, setNewGiftIconFile] = useState(null);
 
   const [selectedEffect, setSelectedEffect] = useState<any>(null);
 
@@ -173,41 +178,174 @@ export default function Revenue() {
     setSelectedGift(item);
     setIsDeleteGiftModalOpen(true);
   };
+ 
+  
 
-  const handleAddGift = () => {
-    if (!newGiftName || !newGiftPrice) return alert("Please provide gift name & price");
 
-    const newGift = {
-      id: Date.now(),
-      name: newGiftName,
-      price: Number(newGiftPrice),
-      icon: newGiftIcon || "🎁",
-      animation: "Default",
-    };
-
-    setGifts((prev) => [...prev, newGift]);
-    setNewGiftName("");
-    setNewGiftPrice("");
-    setNewGiftIcon("");
-    setIsGiftModalOpen(false);
-  };
-
-  const handleSaveGiftEdit = () => {
-    if (selectedGift) {
-      setGifts((prev) => prev.map((gift) => (gift.id === selectedGift.id ? selectedGift : gift)));
-      setIsEditGiftModalOpen(false);
-      setSelectedGift(null);
+  const handleAddGift = async () => {
+    try {
+      // Validation
+      if (!newGiftName || !newGiftPrice || !newGiftIconFile) {
+        return alert("Please provide gift name, price, and upload an image!");
+      }
+  
+      // Create FormData
+      const formData = new FormData();
+      formData.append("name", newGiftName);
+      formData.append("price", newGiftPrice);
+      formData.append("icon", newGiftIconFile); // matches backend multer field
+  
+      // Get token
+      const token = localStorage.getItem("adminToken");
+      console.log("token",token);
+      
+  
+      // Axios POST request
+      const response = await axios.post("http://localhost:4000/api/admin/gift", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (response.data.success) {
+        alert("Gift created successfully!");
+  
+        // Update gifts state with newly created gift
+        setGifts((prev) => [...prev, response.data.data]);
+  
+        // Reset form & close modal
+        setNewGiftName("");
+        setNewGiftPrice("");
+        setNewGiftIcon("");
+        setNewGiftIconFile(null);
+        setIsGiftModalOpen(false);
+      }
+    } catch (error: any) {
+      console.error("Gift Upload Error:", error);
+      alert(error.response?.data?.message || "Failed to create gift");
     }
   };
+  
+  
+  
+  
+  // const handleSaveGiftEdit = () => {
+  //   if (selectedGift) {
+  //     setGifts((prev) => prev.map((gift) => (gift.id === selectedGift.id ? selectedGift : gift)));
+  //     setIsEditGiftModalOpen(false);
+  //     setSelectedGift(null);
+  //   }
+  // };
 
-  const handleDeleteGift = () => {
-    if (selectedGift) {
-      setGifts((prev) => prev.filter((gift) => gift.id !== selectedGift.id));
-      setIsDeleteGiftModalOpen(false);
-      setSelectedGift(null);
+
+  const handleSaveGiftEdit = async () => {
+    if(!selectedGift) return;
+
+    const token = localStorage.getItem("adminToken");
+    const formData = new FormData();
+
+    formData.append("name",selectedGift.name);
+    formData.append("price",selectedGift.price);
+
+    if (selectedGift.newImageFile){
+      formData.append("icon",selectedGift.newImageFile);
     }
+
+    try {
+      const res = await axios.put(
+        `http://localhost:4000/api/admin/gift/${selectedGift._id}`,
+        formData,
+        {
+          headers:{
+            "Content-Type" : "multipart/form-data",
+            Authorization:`Bearer ${token}`,
+          },
+        }
+      );
+      if(res.data.success) {
+        setGifts((prev)=> prev.map((gif)=> gif._id === selectedGift._id ? res.data.data : gif
+      )
+    );
+
+    alert("Gift updated successfully!");
+    setIsEditGiftModalOpen(false);
+    setSelectedGift(null);
+      }
+      
+    } catch (error) {
+      console.log(error);
+      alert("Failed to update gift")
+      
+      
+    }
+
   };
 
+ 
+  // const handleDeleteGift = () => {
+  //   if (selectedGift) {
+  //     setGifts((prev) => prev.filter((gift) => gift.id !== selectedGift.id));
+  //     setIsDeleteGiftModalOpen(false);
+  //     setSelectedGift(null);
+  //   }
+  // };
+
+
+  const handleDeleteGift = async () => {
+    if (!selectedGift) return;
+  
+    try {
+      const token = localStorage.getItem("adminToken");
+  
+      const response = await axios.delete(
+        `http://localhost:4000/api/admin/gift/${selectedGift._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      if (response.data.success) {
+        // Remove the gift from frontend state
+        setGifts((prev) => prev.filter((gift) => gift._id !== selectedGift._id));
+  
+        alert("Gift deleted successfully!");
+        setIsDeleteGiftModalOpen(false);
+        setSelectedGift(null);
+      }
+    } catch (error: any) {
+      console.error("Delete Gift Error:", error);
+      alert(error.response?.data?.message || "Failed to delete gift");
+    }
+  };
+  
+  const fetchGifts = async () => {
+    try {
+      const token = localStorage.getItem("adminToken");
+  
+      const response = await axios.get(
+        "http://localhost:4000/api/admin/gift",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      if (response.data.success) {
+        setGifts(response.data.data); // backend sends { data: [...] }
+      }
+    } catch (error: any) {
+      console.error("Fetch Gifts Error:", error);
+      alert(error.response?.data?.message || "Failed to load gifts");
+    }
+  };
+  
+  useEffect(() => {
+    fetchGifts();
+  }, []);
   // ---------------- Tabs content ----------------
   const coinsTab = (
     <div className="space-y-6">
@@ -372,10 +510,13 @@ export default function Revenue() {
       {/* Gift Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
         {gifts.map((gift) => (
-          <Card key={gift.id} className="p-6 text-center rounded-3xl shadow-md hover:shadow-lg transition-all duration-200">
-            <div className="text-5xl mb-3">{gift.icon}</div>
+          <Card key={gift._id} className="p-6 text-center rounded-3xl shadow-md hover:shadow-lg transition-all duration-200">
+            <div className="text-5xl mb-3">
+            <img src={gift.icon} alt="gift icon" />
+
+            </div>
             <p className="font-semibold text-gray-900 mb-1">{gift.name}</p>
-            <p className="text-sm text-gray-600 mb-2">Animation: {gift.animation}</p>
+            {/* <p className="text-sm text-gray-600 mb-2">Animation: {gift.animation}</p> */}
             <p className="text-lg font-bold text-blue-600 mb-4">{gift.price} coins</p>
 
             <div className="flex gap-2 justify-center">
@@ -402,6 +543,7 @@ export default function Revenue() {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
+                  setNewGiftIconFile(file);
                   const reader = new FileReader();
                   reader.onloadend = () => setNewGiftIcon(reader.result as string);
                   reader.readAsDataURL(file);
@@ -445,8 +587,10 @@ export default function Revenue() {
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    const imageUrl = URL.createObjectURL(file);
-                    setSelectedGift({ ...selectedGift, icon: imageUrl });
+                    const previewUrl = URL.createObjectURL(file);
+                    setSelectedGift({ ...selectedGift, icon: previewUrl , newImageFile:file,
+
+                    });
                   }
                 }}
                 className="mt-1 block w-full border rounded-lg p-2"
@@ -643,7 +787,7 @@ const entryEffectsTab = (
                 className="w-24 h-24 mx-auto rounded-lg"
                 autoPlay
                 loop
-                muted
+                muted               
               />
             ) : (
               <img
@@ -788,3 +932,6 @@ const entryEffectsTab = (
     </div>
   );
 }
+
+
+
