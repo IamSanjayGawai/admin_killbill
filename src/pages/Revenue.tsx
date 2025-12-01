@@ -7,7 +7,7 @@ import Modal from "../components/Modal";
 import Tabs from "../components/Tabs";
 import axios from "axios";
 import { Plus, Edit, Trash2, Coins as CoinsIcon, Coins } from "lucide-react";
-import { generateMockCoinPackages, generateMockGifts } from "../utils/mockData";
+// import { generateMockCoinPackages, generateMockGifts } from "../utils/mockData";
 
 export default function Revenue() {
   // ---------------- Modal States ----------------
@@ -29,7 +29,7 @@ export default function Revenue() {
   const [hostFee, setHostFee] = useState("70");
 
   // ---------------- Mock Data ----------------
-  const mockCoinPackages = generateMockCoinPackages();
+  // const mockCoinPackages = generateMockCoinPackages();
   // const mockGifts = generateMockGifts();
 
   // ---------------- Gift Management ----------------
@@ -41,14 +41,17 @@ export default function Revenue() {
   const [newGiftIcon, setNewGiftIcon] = useState("");
 
   // ---------------- Coin Packages ----------------
-  const [coinPackages, setCoinPackages] = useState(mockCoinPackages || []);
+  // const [coinPackages, setCoinPackages] = useState( "");
+  const [coinPackages, setCoinPackages] = useState<any[]>([]);
   const [newPackage, setNewPackage] = useState("");
   const [editPackage, setEditPackage] = useState("");
 
   const [newCoinCount, setNewCoinCount] = useState("");
   const [newCoinPrice, setNewCoinPrice] = useState("");
+  const [newBonus, setNewBonus] = useState("");
   const [editCoinCount, setEditCoinCount] = useState("");
   const [editCoinPrice, setEditCoinPrice] = useState("");
+  
 
   // ---------------- Entry Effects ----------------
   const [entryEffects, setEntryEffects] = useState<any[]>([]);
@@ -107,59 +110,193 @@ export default function Revenue() {
   };
 
   // ---------------- Coin Package Functions ----------------
-  const handleAddPackage = () => {
-    // validation
+  // const handleAddPackage = () => {
+  //   // validation
+  //   if (!newPackage || !newCoinCount || !newCoinPrice) {
+  //     return alert("Please select a package and fill coins & price.");
+  //   }
+
+  //   const newPkgObj = {
+  //     id: Date.now(),
+  //     package: newPackage,
+  //     coins: Number(newCoinCount),
+  //     price: Number(newCoinPrice),
+  //   };
+
+  //   setCoinPackages((prev) => [...prev, newPkgObj]);
+
+  //   // reset fields
+  //   setNewPackage("");
+  //   setNewCoinCount("");
+  //   setNewCoinPrice("");
+  //   setIsCoinModalOpen(false);
+  // };
+
+  // const handleAddPackage = async () => {
+  //   if (!newPackage || !newCoinCount || !newCoinPrice) {
+  //     alert("All fields are required");
+  //     return;
+  //   }
+  
+  //   try {
+  //     const token = localStorage.getItem("adminToken");
+  
+  //     const response = await axios.post(
+  //       "http://localhost:4000/api/admin/coinPackages/",
+  //       {
+  //         title: newPackage,
+  //         coins: Number(newCoinCount),
+  //         price: Number(newCoinPrice),
+  //         bonus: newBonus || 0, // optional
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+  
+  //     if (response.data.success) {
+  //       // Add newly created package to UI list
+  //       setCoinPackages((prev) => [...prev, response.data.data]);
+  
+  //       // Reset form
+  //       setNewPackage("");
+  //       setNewCoinCount("");
+  //       setNewCoinPrice("");
+  //       setNewBonus("");
+  
+  //       setIsCoinModalOpen(false);
+  //     }
+  //   } catch (error: any) {
+  //     console.error("Create Coin Package Error:", error.response?.data || error);
+  //     alert(error.response?.data?.message || "Failed to create coin package");
+  //   }
+  // };
+
+
+  const handleAddPackage = async () => {
     if (!newPackage || !newCoinCount || !newCoinPrice) {
-      return alert("Please select a package and fill coins & price.");
+      return alert("All fields are required");
     }
-
-    const newPkgObj = {
-      id: Date.now(),
-      package: newPackage,
-      coins: Number(newCoinCount),
-      price: Number(newCoinPrice),
-    };
-
-    setCoinPackages((prev) => [...prev, newPkgObj]);
-
-    // reset fields
-    setNewPackage("");
-    setNewCoinCount("");
-    setNewCoinPrice("");
-    setIsCoinModalOpen(false);
+  
+    try {
+      const token = localStorage.getItem("adminToken");
+  
+      const response = await axios.post(
+        "http://localhost:4000/api/admin/coinPackages/",
+        {
+          title: newPackage,
+          coins: Number(newCoinCount),
+          price: Number(newCoinPrice),
+          bonus: newBonus ? Number(newBonus) : 0,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+  
+      if (response.data.success) {
+        // Add new package to UI
+        setCoinPackages((prev) => [...prev, response.data.data]);
+  
+        // Reset modal fields
+        setNewPackage("");
+        setNewCoinCount("");
+        setNewCoinPrice("");
+        setNewBonus("");
+        setIsCoinModalOpen(false);
+      }
+    } catch (error: any) {
+      console.error("Create Coin Package Error:", error.response?.data || error);
+      alert(error.response?.data?.message || "Failed to create coin package");
+    }
   };
+  
+  
+
+  // const handleEditOpen = (pkg: any) => {
+  //   setSelectedPackage(pkg);
+  //   setEditCoinCount(String(pkg.coins ?? ""));
+  //   setEditCoinPrice(String(pkg.price ?? ""));
+  //   setEditPackage(pkg.package ?? "");
+  //   setIsEditModalOpen(true);
+  // };
+
 
   const handleEditOpen = (pkg: any) => {
     setSelectedPackage(pkg);
-    setEditCoinCount(String(pkg.coins ?? ""));
-    setEditCoinPrice(String(pkg.price ?? ""));
-    setEditPackage(pkg.package ?? "");
+    setEditPackage(pkg.title); // ✅ title not package
+    setEditCoinCount(String(pkg.coins));
+    setEditCoinPrice(String(pkg.price));
     setIsEditModalOpen(true);
   };
 
-  const handleSaveEdit = () => {
+  // const handleSaveEdit = () => {
+  //   if (!selectedPackage) return;
+
+  //   setCoinPackages((prev) =>
+  //     prev.map((p) =>
+  //       p.id === selectedPackage.id
+  //         ? {
+  //             ...p,
+  //             package: editPackage,
+  //             coins: Number(editCoinCount),
+  //             price: Number(editCoinPrice),
+  //           }
+  //         : p
+  //     )
+  //   );
+
+  //   // reset edit state
+  //   setSelectedPackage(null);
+  //   setEditPackage("");
+  //   setEditCoinCount("");
+  //   setEditCoinPrice("");
+  //   setIsEditModalOpen(false);
+  // };
+
+
+
+  const handleSaveEdit = async () => {
     if (!selectedPackage) return;
-
-    setCoinPackages((prev) =>
-      prev.map((p) =>
-        p.id === selectedPackage.id
-          ? {
-              ...p,
-              package: editPackage,
-              coins: Number(editCoinCount),
-              price: Number(editCoinPrice),
-            }
-          : p
-      )
-    );
-
-    // reset edit state
-    setSelectedPackage(null);
-    setEditPackage("");
-    setEditCoinCount("");
-    setEditCoinPrice("");
-    setIsEditModalOpen(false);
+  
+    try {
+      const token = localStorage.getItem("adminToken");
+  
+      const response = await axios.put(
+        `http://localhost:4000/api/admin/coinPackages/${selectedPackage._id}`,
+        {
+          title: editPackage,
+          coins: Number(editCoinCount),
+          price: Number(editCoinPrice),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      if (response.data.success) {
+        // ✅ Update UI with backend response
+        setCoinPackages((prev) =>
+          prev.map((pkg) =>
+            pkg._id === selectedPackage._id ? response.data.data : pkg
+          )
+        );
+  
+        alert("Package updated successfully!");
+        setIsEditModalOpen(false);
+        setSelectedPackage(null);
+      }
+    } catch (error: any) {
+      console.error("Update Error:", error);
+      alert(error.response?.data?.message || "Failed to update package");
+    }
   };
+  
+
 
   const handleDeletePackage = () => {
     if (!selectedPackage) return;
@@ -393,52 +530,67 @@ export default function Revenue() {
 
       {/* Add Coin Modal */}
       <Modal isOpen={isCoinModalOpen} onClose={() => setIsCoinModalOpen(false)} title="Add Coin Package">
-        <div className="space-y-4">
-          {/* Package Dropdown */}
-          <label className="block">
-            <span className="text-gray-700 font-medium">Package</span>
-            <select className="mt-1 block w-full border rounded-lg p-2" value={newPackage} onChange={(e) => setNewPackage(e.target.value)}>
-              <option value="">Select a package</option>
-              <option value="Basic Pack">Basic Pack</option>
-              <option value="Silver Pack">Silver Pack</option>
-              <option value="Gold Pack">Gold Pack</option>
-              <option value="Premium Pack">Premium Pack</option>
-            </select>
-          </label>
+  <div className="space-y-4">
+    {/* Package Dropdown */}
+    <label className="block">
+      <span className="text-gray-700 font-medium">Package</span>
+      <select
+        className="mt-1 block w-full border rounded-lg p-2"
+        value={newPackage}
+        onChange={(e) => setNewPackage(e.target.value)}
+      >
+        <option value="">Select a package</option>
+        <option value="Basic Pack">Basic Pack</option>
+        <option value="Silver Pack">Silver Pack</option>
+        <option value="Gold Pack">Gold Pack</option>
+        <option value="Premium Pack">Premium Pack</option>
+      </select>
+    </label>
 
-          <label className="block">
-            <span className="text-gray-700 font-medium">Coins</span>
-            <input
-              type="number"
-              className="mt-1 block w-full border rounded-lg p-2"
-              placeholder="Enter number of coins"
-              value={newCoinCount}
-              onChange={(e) => setNewCoinCount(e.target.value)}
-            />
-          </label>
+    <label className="block">
+      <span className="text-gray-700 font-medium">Coins</span>
+      <input
+        type="number"
+        className="mt-1 block w-full border rounded-lg p-2"
+        placeholder="Enter number of coins"
+        value={newCoinCount}
+        onChange={(e) => setNewCoinCount(e.target.value)}
+      />
+    </label>
 
-          <label className="block">
-            <span className="text-gray-700 font-medium">Price (₹)</span>
-            <input
-              type="number"
-              className="mt-1 block w-full border rounded-lg p-2"
-              placeholder="Enter price"
-              value={newCoinPrice}
-              onChange={(e) => setNewCoinPrice(e.target.value)}
-            />
-          </label>
+    <label className="block">
+      <span className="text-gray-700 font-medium">Price (₹)</span>
+      <input
+        type="number"
+        className="mt-1 block w-full border rounded-lg p-2"
+        placeholder="Enter price"
+        value={newCoinPrice}
+        onChange={(e) => setNewCoinPrice(e.target.value)}
+      />
+    </label>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg" onClick={() => setIsCoinModalOpen(false)}>
-              Cancel
-            </Button>
+    <label className="block">
+      <span className="text-gray-700 font-medium">Bonus Coins (Optional)</span>
+      <input
+        type="number"
+        className="mt-1 block w-full border rounded-lg p-2"
+        placeholder="Enter bonus coins"
+        value={newBonus}
+        onChange={(e) => setNewBonus(e.target.value)}
+      />
+    </label>
 
-            <Button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700" onClick={handleAddPackage}>
-              Add Package
-            </Button>
-          </div>
-        </div>
-      </Modal>
+    <div className="flex justify-end gap-2 pt-4">
+      <Button className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg" onClick={() => setIsCoinModalOpen(false)}>
+        Cancel
+      </Button>
+      <Button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700" onClick={handleAddPackage}>
+        Add Package
+      </Button>
+    </div>
+  </div>
+</Modal>
+
 
       {/* Edit Coin Package Modal */}
       <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Edit Coin Package">
