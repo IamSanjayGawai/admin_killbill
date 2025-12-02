@@ -15,7 +15,7 @@ export default function Revenue() {
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
- 
+
 
   const [isEntryEffectModalOpen, setIsEntryEffectModalOpen] = useState(false);
   const [isEditGiftModalOpen, setIsEditGiftModalOpen] = useState(false);
@@ -28,25 +28,21 @@ export default function Revenue() {
   // ---------------- Fee Inputs ----------------
   const [platformFee, setPlatformFee] = useState("30");
   const [hostFee, setHostFee] = useState("70");
-
-  
-
   // ---------------- Gift Management ----------------
   const [gifts, setGifts] = useState([]);
-  // const [gifts, setGifts] = useState<any[]>([]);
   const [newGiftName, setNewGiftName] = useState("");
   const [newGiftPrice, setNewGiftPrice] = useState("");
   const [newGiftIcon, setNewGiftIcon] = useState("");
 
   // ---------------- Coin Packages ----------------
- 
+
   const [newPackage, setNewPackage] = useState("");
- 
-// ---------------- Coin Packages ----------------
-const [coinPackages, setCoinPackages] = useState<any[]>([]); 
+
+  // ---------------- Coin Packages ----------------
+  const [coinPackages, setCoinPackages] = useState<any[]>([]);
 
   const [editPackage, setEditPackage] = useState("");
- 
+
 
   const [newCoinCount, setNewCoinCount] = useState("");
   const [newCoinPrice, setNewCoinPrice] = useState("");
@@ -57,11 +53,12 @@ const [coinPackages, setCoinPackages] = useState<any[]>([]);
 
   // ---------------- Entry Effects ----------------
   const [entryEffects, setEntryEffects] = useState<any[]>([]);
+  const [effects, setEffects] = useState([]);
   const [isEditEntryEffectModalOpen, setIsEditEntryEffectModalOpen] = useState(false);
   const [isDeleteEntryEffectModalOpen, setIsDeleteEntryEffectModalOpen] = useState(false);
   const [title, setTitle] = useState("");
-const [price, setPrice] = useState("");
-const [selectedFile, setSelectedFile] = useState(null);
+  const [price, setPrice] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
 
 
   const [newEffectFile, setNewEffectFile] = useState<File | null>(null);
@@ -82,15 +79,15 @@ const [selectedFile, setSelectedFile] = useState(null);
       alert("Please provide name, coins, and a file!");
       return;
     }
-  
+
     try {
       const token = localStorage.getItem("adminToken");
-  
+
       const formData = new FormData();
       formData.append("title", newEffectName);
       formData.append("price", newEffectCoins);
       formData.append("animation", newEffectFile); // must match multer field
-  
+
       const response = await axios.post(
         "http://localhost:4000/api/admin/entry-effects/",
         formData,
@@ -101,18 +98,18 @@ const [selectedFile, setSelectedFile] = useState(null);
           },
         }
       );
-  
+
       if (response.data.success) {
         // Add the new effect from backend response to frontend state
         setEntryEffects((prev) => [...prev, response.data.data]);
-  
+
         // Reset form
         setNewEffectName("");
         setNewEffectFile(null);
         setNewEffectPreview("");
         setNewEffectCoins("");
         setIsEntryEffectModalOpen(false);
-  
+
         alert("Entry effect created successfully!");
       }
     } catch (error: any) {
@@ -120,60 +117,31 @@ const [selectedFile, setSelectedFile] = useState(null);
       alert(error.response?.data?.message || "Failed to create entry effect");
     }
   };
-  
 
   // Entry Effect handlesubmit...........
-   
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  
-  //   if (!selectedFile) {
-  //     alert("Please select an animation file");
-  //     return;
-  //   }
-  
-  //   try {
-  //     const token = localStorage.getItem("adminToken");
-  
-  //     const result = await createEntryEffect(
-  //       title,          // string
-  //       price,          // number
-  //       selectedFile,   // file
-  //       token           // token
-  //     );
-  
-  //     console.log("Entry Effect Created:", result);
-  //     alert("Entry Effect Created Successfully");
-  
-  //     fetchEntryEffects();  // refresh list
-  //     closeModal();
-  //   } catch (error) {
-  //     alert("Failed to create entry effect");
-  //   }
-  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     if (!selectedFile) {
       alert("Please select an animation file");
       return;
     }
-  
+
     try {
       const token = localStorage.getItem("adminToken");
       if (!token) throw new Error("Admin token not found");
-  
+
       const result = await createEntryEffect(
         title,
         String(price),   // ensure string for FormData
         selectedFile,
         token
       );
-  
+
       console.log("Entry Effect Created:", result);
       alert("Entry Effect Created Successfully");
-  
+
       fetchEntryEffects();  // refresh list
       closeModal();
     } catch (error: any) {
@@ -181,26 +149,6 @@ const [selectedFile, setSelectedFile] = useState(null);
       alert(error.response?.data?.message || "Failed to create entry effect");
     }
   };
-  
-  
-
-  const handleSaveEntryEffectEdit = () => {
-    if (!selectedEffect) return;
-
-    setEntryEffects((prev) =>
-      prev.map((efe) => (efe.id === selectedEffect.id ? selectedEffect : efe))
-    );
-
-    setIsEditEntryEffectModalOpen(false);
-    setSelectedEffect(null);
-  };
-
-  const handleDeleteEntryEffect = (id: number) => {
-    setEntryEffects((prev) => prev.filter((efe) => efe.id !== id));
-    setIsDeleteEntryEffectModalOpen(false);
-  };
-
-
   const handleEditOpen = (pkg: any) => {
     setSelectedPackage(pkg);
     setEditPackage(pkg.title); // ✅ title not package
@@ -208,7 +156,7 @@ const [selectedFile, setSelectedFile] = useState(null);
     setEditCoinPrice(String(pkg.price));
     setIsEditModalOpen(true);
   };
-  
+
   // ---------------- Gift Functions ----------------
   const openEditModal = (item: any) => {
     setSelectedGift(item);
@@ -219,13 +167,18 @@ const [selectedFile, setSelectedFile] = useState(null);
     setSelectedGift(item);
     setIsDeleteGiftModalOpen(true);
   };
-  
+
+
+
+
+
+// coins packages................
 
   const handleAddCoinPackage = async () => {
     if (!newPackage.title || !newPackage.coins || !newPackage.price) {
       return alert("Please fill all fields!");
     }
-  
+
     try {
       const token = localStorage.getItem("adminToken");
       console.log("token", token);
@@ -243,7 +196,7 @@ const [selectedFile, setSelectedFile] = useState(null);
           },
         }
       );
-  
+
       if (response.data.success) {
         setCoinPackages((prev) => [...prev, response.data.data]);
         setIsCoinModalOpen(false);
@@ -253,7 +206,7 @@ const [selectedFile, setSelectedFile] = useState(null);
       console.log("Error adding coin package:", error.response?.data || error.message);
     }
   };
-  
+
   const updateCoinPackage = async () => {
     try {
       const token = localStorage.getItem("adminToken");  // or use your auth method
@@ -261,7 +214,7 @@ const [selectedFile, setSelectedFile] = useState(null);
         alert("Please select a package");
         return;
       }
-  
+
       const response = await axios.put(
         `http://localhost:4000/api/admin/coin-packages/${selectedPackage._id}`,
         {
@@ -277,22 +230,22 @@ const [selectedFile, setSelectedFile] = useState(null);
           }
         }
       );
-  
+
       alert("Package updated successfully");
       console.log(response.data);
-  
+
       // close modal
       setShowAddModal(false);
-  
+
       // reload packages after update
       fetchPackages();
-  
+
     } catch (error) {
       console.error(error);
       alert("Failed to update package");
     }
   };
-  
+
   const deleteCoinPackage = async (id) => {
     try {
       const response = await axios.delete(
@@ -311,8 +264,11 @@ const [selectedFile, setSelectedFile] = useState(null);
       alert("Failed to delete");
     }
   };
-  
- 
+
+
+
+
+  //  Gift .................
   
   const handleAddGift = async () => {
     try {
@@ -359,40 +315,90 @@ const [selectedFile, setSelectedFile] = useState(null);
     }
   };
 
- const handleSaveEdit = async () => {
-  try {
-    if (!selectedPackage) {
-      alert("No package selected");
-      return;
-    }
-
-    const token = localStorage.getItem("adminToken");
-
-    const response = await axios.put(
-      `http://localhost:4000/api/admin/coinPackages/${selectedPackage._id}`,
-      {
-        title: editPackage,
-        coins: editCoinCount,
-        price: editCoinPrice,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+  const handleSaveEdit = async () => {
+    try {
+      if (!selectedPackage) {
+        alert("No package selected");
+        return;
       }
-    );
 
-    console.log("Updated:", response.data);
-    alert("Coin package updated successfully!");
+      const token = localStorage.getItem("adminToken");
 
-    setIsEditModalOpen(false);
-    fetchPackages(); // refresh table
+      const response = await axios.put(
+        `http://localhost:4000/api/admin/coin-packages/${selectedPackage._id}`,
+        {
+          title: editPackage,
+          coins: editCoinCount,
+          price: editCoinPrice,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-  } catch (error) {
-    console.error(error);
-    alert("Failed to update package");
-  }
-};
+      console.log("Updated:", response.data);
+      alert("Coin package updated successfully!");
+
+      setIsEditModalOpen(false);
+      fetchPackages(); // refresh table
+
+    } catch (error) {
+      console.error(error);
+      alert("Failed to update package");
+    }
+  };
+
+  //  Gift .................
+
+
+  const handleSaveGiftEdit = async () => {
+    try {
+      if (!selectedGift) return alert("No gift selected!");
+  
+      const token = localStorage.getItem("adminToken");
+      const formData = new FormData();
+  
+      // name & price
+      formData.append("name", selectedGift.name);
+      formData.append("price", selectedGift.price);
+  
+      // If a new icon file was uploaded
+      if (selectedGift.newIconFile) {
+        formData.append("icon", selectedGift.newIconFile);
+      }
+  
+      const response = await axios.put(
+        `http://localhost:4000/api/admin/gift/${selectedGift._id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+  
+      if (response.data.success) {
+        // Update UI
+        setGifts((prev) =>
+          prev.map((g) =>
+            g._id === selectedGift._id ? response.data.data : g
+          )
+        );
+  
+        alert("Gift updated successfully!");
+        setIsEditGiftModalOpen(false);
+        setSelectedGift(null);
+      }
+    } catch (error: any) {
+      console.error("Gift Edit Error:", error);
+      alert(error.response?.data?.message || "Failed to update gift");
+    }
+  };
+  
+
 
   const handleDeleteGift = async () => {
     if (!selectedGift) return;
@@ -444,18 +450,21 @@ const [selectedFile, setSelectedFile] = useState(null);
       alert(error.response?.data?.message || "Failed to load gifts");
     }
   };
+
+
+
   useEffect(() => {
     const fetchCoinPackages = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:4000/api/admin/coinPackages/",
+          "http://localhost:4000/api/admin/coin-packages/",
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
             },
           }
         );
-  
+
         if (response.data.success) {
           setCoinPackages(response.data.data);
         }
@@ -463,10 +472,10 @@ const [selectedFile, setSelectedFile] = useState(null);
         console.log("Error fetching coin packages:", error);
       }
     };
-  
+
     fetchCoinPackages();
   }, []);
-  
+
 
   useEffect(() => {
     fetchGifts();
@@ -474,15 +483,13 @@ const [selectedFile, setSelectedFile] = useState(null);
 
   // Get Fees .................
 
- 
-
   useEffect(() => {
     const fetchFees = async () => {
       try {
         const response = await axios.get(
           "http://localhost:4000/api/admin/fees-management"
         );
-  
+
         if (response.data.success) {
           const data = response.data.data;
           setPlatformFee(data.platformFee?.toString() || "30");
@@ -492,11 +499,9 @@ const [selectedFile, setSelectedFile] = useState(null);
         console.error("Error fetching fees:", error);
       }
     };
-  
+
     fetchFees();
   }, []);
-  
-  
 
   const handleSave = async () => {
     try {
@@ -512,7 +517,7 @@ const [selectedFile, setSelectedFile] = useState(null);
           },
         }
       );
-  
+
       if (response.data.success) {
         alert("Fees updated successfully!");
         console.log("Updated fees:", response.data.data);
@@ -522,7 +527,7 @@ const [selectedFile, setSelectedFile] = useState(null);
       alert("Failed to update fees");
     }
   };
-  
+
   // Entry Effect............
 
   const createEntryEffect = async (title, price, file, token) => {
@@ -531,9 +536,9 @@ const [selectedFile, setSelectedFile] = useState(null);
       formData.append("title", title);
       formData.append("price", price);
       formData.append("animation", file); // MUST match multer field name
-  
+
       const response = await axios.post(
-        "http://localhost:4000/api/admin/entryEffects/",
+        "http://localhost:4000/api/admin/entry-effects/",
         formData,
         {
           headers: {
@@ -542,16 +547,121 @@ const [selectedFile, setSelectedFile] = useState(null);
           },
         }
       );
-  
+
       return response.data;
     } catch (error) {
       console.error("Error creating entry effect:", error);
       throw error;
     }
   };
-  
-  
-  
+
+  // Get Entry Effects .................
+  const fetchEntryEffects = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:4000/api/admin/entry-effects/"
+      );
+
+      return response.data; // contains success & data array
+    } catch (error) {
+      console.error("Error fetching entry effects:", error);
+      throw error;
+    }
+  };
+
+  // Edit Entry Effect .................
+
+  const handleSaveEntryEffectEdit = async () => {
+    if (!selectedEffect) return;
+
+    try {
+      const token = localStorage.getItem("adminToken");
+      if (!token) throw new Error("Admin token not found");
+
+      const formData = new FormData();
+      formData.append("title", selectedEffect.name);
+      formData.append("price", String(selectedEffect.price));
+
+      if (selectedEffect.newFile) {
+        formData.append("animation", selectedEffect.newFile);
+      }
+
+      const response = await axios.put(
+        `http://localhost:4000/api/admin/entry-effects/${selectedEffect._id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        // Update effects state immediately with backend response
+        setEffects((prev) =>
+          prev.map((ef) =>
+            ef._id === selectedEffect._id ? response.data.data : ef
+          )
+        );
+
+        alert("Entry effect updated successfully!");
+        setIsEditEntryEffectModalOpen(false);
+        setSelectedEffect(null);
+      } else {
+        alert(response.data.message || "Failed to update entry effect");
+      }
+    } catch (error: any) {
+      console.error("Update Error:", error);
+      alert(error.response?.data?.message || "Failed to update entry effect");
+    }
+  };
+
+  // Delete Entry Effect .................
+
+
+  const handleDeleteEntryEffect = async (id: string) => {
+    try {
+      const token = localStorage.getItem("adminToken");
+      if (!token) throw new Error("Admin token not found");
+
+      const response = await axios.delete(
+        `http://localhost:4000/api/admin/entry-effects/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        // Remove the entry effect from frontend state
+        setEffects((prev) => prev.filter((efe) => efe._id !== id));
+        alert("Entry effect deleted successfully!");
+        setIsDeleteEntryEffectModalOpen(false);
+        setSelectedEffect(null);
+      } else {
+        alert(response.data.message || "Failed to delete entry effect");
+      }
+    } catch (error: any) {
+      console.error("Delete Entry Effect Error:", error);
+      alert(error.response?.data?.message || "Failed to delete entry effect");
+    }
+  };
+
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const res = await fetchEntryEffects();
+        setEffects(res.data); // backend returns {success, data}
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    loadData();
+  }, []);
+
   // ---------------- Tabs content ----------------
   const coinsTab = (
     <div className="space-y-6">
@@ -599,50 +709,50 @@ const [selectedFile, setSelectedFile] = useState(null);
 
       {/* Add Coin Modal */}
       <Modal isOpen={isCoinModalOpen} onClose={() => setIsCoinModalOpen(false)} title="Add Coin Package">
-  <div className="space-y-4">
-    <label className="block">
-      <span className="text-gray-700 font-medium">Package</span>
-      <select
-        className="mt-1 block w-full border rounded-lg p-2"
-        value={newPackage.title}
-        onChange={(e) => setNewPackage({ ...newPackage, title: e.target.value })}
-      >
-        <option value="">Select a package</option>
-        <option value="Basic Pack">Basic Pack</option>
-        <option value="Silver Pack">Silver Pack</option>
-        <option value="Gold Pack">Gold Pack</option>
-        <option value="Premium Pack">Premium Pack</option>
-      </select>
-    </label>
+        <div className="space-y-4">
+          <label className="block">
+            <span className="text-gray-700 font-medium">Package</span>
+            <select
+              className="mt-1 block w-full border rounded-lg p-2"
+              value={newPackage.title}
+              onChange={(e) => setNewPackage({ ...newPackage, title: e.target.value })}
+            >
+              <option value="">Select a package</option>
+              <option value="Basic Pack">Basic Pack</option>
+              <option value="Silver Pack">Silver Pack</option>
+              <option value="Gold Pack">Gold Pack</option>
+              <option value="Premium Pack">Premium Pack</option>
+            </select>
+          </label>
 
-    <label className="block">
-      <span className="text-gray-700 font-medium">Coins</span>
-      <input
-        type="number"
-        className="mt-1 block w-full border rounded-lg p-2"
-        placeholder="Enter number of coins"
-        value={newPackage.coins}
-        onChange={(e) => setNewPackage({ ...newPackage, coins: e.target.value })}
-      />
-    </label>
+          <label className="block">
+            <span className="text-gray-700 font-medium">Coins</span>
+            <input
+              type="number"
+              className="mt-1 block w-full border rounded-lg p-2"
+              placeholder="Enter number of coins"
+              value={newPackage.coins}
+              onChange={(e) => setNewPackage({ ...newPackage, coins: e.target.value })}
+            />
+          </label>
 
-    <label className="block">
-      <span className="text-gray-700 font-medium">Price (₹)</span>
-      <input
-        type="number"
-        className="mt-1 block w-full border rounded-lg p-2"
-        placeholder="Enter price"
-        value={newPackage.price}
-        onChange={(e) => setNewPackage({ ...newPackage, price: e.target.value })}
-      />
-    </label>
+          <label className="block">
+            <span className="text-gray-700 font-medium">Price (₹)</span>
+            <input
+              type="number"
+              className="mt-1 block w-full border rounded-lg p-2"
+              placeholder="Enter price"
+              value={newPackage.price}
+              onChange={(e) => setNewPackage({ ...newPackage, price: e.target.value })}
+            />
+          </label>
 
-    <div className="flex justify-end gap-2 pt-4">
-      <Button className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg" onClick={() => setIsCoinModalOpen(false)}>Cancel</Button>
-      <Button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700" onClick={handleAddCoinPackage}>Add Package</Button>
-    </div>
-  </div>
-</Modal>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg" onClick={() => setIsCoinModalOpen(false)}>Cancel</Button>
+            <Button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700" onClick={handleAddCoinPackage}>Add Package</Button>
+          </div>
+        </div>
+      </Modal>
 
 
       {/* Edit Coin Package Modal */}
@@ -685,24 +795,24 @@ const [selectedFile, setSelectedFile] = useState(null);
 
       {/* Delete Modal */}
       <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} title="Delete Coin Package">
-  <div className="text-center space-y-4">
-    <p className="text-gray-700">
-      Are you sure you want to delete the <strong>{selectedPackage?.coins}</strong> coins package?
-    </p>
+        <div className="text-center space-y-4">
+          <p className="text-gray-700">
+            Are you sure you want to delete the <strong>{selectedPackage?.coins}</strong> coins package?
+          </p>
 
-    <div className="flex justify-center gap-3">
-      <Button className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg" onClick={() => setIsDeleteModalOpen(false)}>
-        Cancel
-      </Button>
-      <Button
-        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-        onClick={() => deleteCoinPackage(selectedPackage._id)}
-      >
-        Delete
-      </Button>
-    </div>
-  </div>
-</Modal>
+          <div className="flex justify-center gap-3">
+            <Button className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg" onClick={() => setIsDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              onClick={() => deleteCoinPackage(selectedPackage._id)}
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
     </div>
   );
@@ -869,8 +979,8 @@ const [selectedFile, setSelectedFile] = useState(null);
           </div>
 
           <Button variant="primary" onClick={handleSave}>
-  Save Fee Settings
-</Button>
+            Save Fee Settings
+          </Button>
 
         </div>
       </Card>
@@ -889,97 +999,31 @@ const [selectedFile, setSelectedFile] = useState(null);
         </Button>
       </div>
 
-      {/* Grid Card View */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-        {/* {entryEffects.map((effect) => (
-          <Card
-            key={effect.id}
-            className="p-6 text-center rounded-3xl shadow-md hover:shadow-lg transition-all duration-200"
-          >
-          
-            {effect.fileUrl && (
-              <div className="mb-3">
-                {effect.fileUrl.endsWith(".mp4") ||
+      {/* entry effect View tab */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {effects.map((item) => (
+          <Card key={item._id} className="p-4 rounded-xl shadow-md">
+            <video
+              src={item.animation}
+              controls
+              className="w-full h-40 object-contain mb-3"
+            />
+            <p className="font-semibold text-gray-900">{item.title}</p>
+            <p className="text-blue-600 font-bold">{item.price} coins</p>
 
-                  effect.fileUrl.endsWith(".mov") ||
-                  effect.fileUrl.endsWith(".webm") ? (
-                  <video
-                    src={effect.fileUrl}
-                    className="w-20 h-20 object-cover rounded-lg mx-auto"
-                    autoPlay
-                    loop
-                    muted
-                  />
-                ) : (
-                  <img
-                    src={effect.fileUrl}
-                    className="w-20 h-20 object-cover rounded-lg mx-auto"
-                  />
-                )}
-              </div>
-            )}
-
-            <p className="font-semibold text-gray-900 mb-1">{effect.name}</p>
-            <p className="text-sm text-gray-600">{effect.fileName}</p>
-            <p className="text-sm font-bold text-green-700 mt-2">
-              {effect.coins} Coins
-            </p>
-
-            <div className="flex gap-2 justify-center mt-4">
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => {
-                  setSelectedEffect({ ...effect });
-                  setIsEditEntryEffectModalOpen(true);
-                }}
-              >
-                <Edit size={14} />
+            <div className="flex gap-2 justify-center mt-3">
+              <Button size="sm" onClick={() => { setSelectedEffect(item); setIsEditEntryEffectModalOpen(true); }}>
+                Edit
               </Button>
 
-              <Button
-                size="sm"
-                variant="danger"
-                onClick={() => {
-                  setSelectedEffect(effect);
-                  setIsDeleteEntryEffectModalOpen(true);
-                }}
-              >
-                <Trash2 size={14} />
+              <Button size="sm" variant="danger" onClick={() => { setSelectedEffect(item); setIsDeleteEntryEffectModalOpen(true); }}>
+                Delete
               </Button>
             </div>
           </Card>
-        ))} */}
-
-{entryEffects.map((effect) => (
-  <Card key={effect.id}>
-    {effect.animation && (  // <-- use 'animation' instead of 'fileUrl'
-      <div className="mb-3">
-        {effect.animation.endsWith(".mp4") ||
-        effect.animation.endsWith(".mov") ||
-        effect.animation.endsWith(".webm") ? (
-          <video
-            src={effect.animation}
-            className="w-20 h-20 object-cover rounded-lg mx-auto"
-            autoPlay
-            loop
-            muted
-          />
-        ) : (
-          <img
-            src={effect.animation}
-            className="w-20 h-20 object-cover rounded-lg mx-auto"
-          />
-        )}
+        ))}
       </div>
-    )}
 
-    <p className="font-semibold text-gray-900 mb-1">{effect.title}</p> {/* title instead of name */}
-    <p className="text-sm font-bold text-green-700 mt-2">{effect.price} Coins</p>
-  </Card>
-))}
-
-      </div>
 
       {/* ------------------------- ADD ENTRY EFFECT MODAL ------------------------- */}
       <Modal
@@ -1082,6 +1126,7 @@ const [selectedFile, setSelectedFile] = useState(null);
                 if (newFile) {
                   setSelectedEffect({
                     ...selectedEffect,
+                    newFile: newFile,
                     fileName: newFile.name,
                     fileUrl: URL.createObjectURL(newFile),
                   });
@@ -1134,10 +1179,17 @@ const [selectedFile, setSelectedFile] = useState(null);
         </p>
 
         <div className="flex gap-4 mt-4">
-          <Button
+          {/* <Button
             variant="danger"
             className="flex-1"
             onClick={() => handleDeleteEntryEffect(selectedEffect.id)}
+          >
+            Delete
+          </Button> */}
+          <Button
+            variant="danger"
+            className="flex-1"
+            onClick={() => handleDeleteEntryEffect(selectedEffect._id)}
           >
             Delete
           </Button>
