@@ -7,7 +7,7 @@ import Modal from "../components/Modal";
 import Tabs from "../components/Tabs";
 import axios from "axios";
 import { Plus, Edit, Trash2, Coins as CoinsIcon, Coins } from "lucide-react";
-import { generateMockCoinPackages, generateMockGifts } from "../utils/mockData";
+// import { generateMockCoinPackages, generateMockGifts } from "../utils/mockData";
 
 export default function Revenue() {
   // ---------------- Modal States ----------------
@@ -46,8 +46,10 @@ export default function Revenue() {
 
   const [newCoinCount, setNewCoinCount] = useState("");
   const [newCoinPrice, setNewCoinPrice] = useState("");
+  const [newBonus, setNewBonus] = useState("");
   const [editCoinCount, setEditCoinCount] = useState("");
   const [editCoinPrice, setEditCoinPrice] = useState("");
+  
 
   // ---------------- Entry Effects ----------------
   const [entryEffects, setEntryEffects] = useState<any[]>([]);
@@ -151,9 +153,9 @@ export default function Revenue() {
   };
   const handleEditOpen = (pkg: any) => {
     setSelectedPackage(pkg);
-    setEditCoinCount(String(pkg.coins ?? ""));
-    setEditCoinPrice(String(pkg.price ?? ""));
-    setEditPackage(pkg.package ?? "");
+    setEditPackage(pkg.title); // ✅ title not package
+    setEditCoinCount(String(pkg.coins));
+    setEditCoinPrice(String(pkg.price));
     setIsEditModalOpen(true);
   };
 
