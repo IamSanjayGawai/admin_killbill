@@ -70,6 +70,8 @@ export default function Revenue() {
   const [newEffectCoins, setNewEffectCoins] = useState("");
 
   const [newEffectImagePreview, setNewEffectImagePreview] = useState(null);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+
 
   // ---------------- Entry Effect Functions ----------------
   const handleAddEntryEffect = async () => {
@@ -166,10 +168,6 @@ export default function Revenue() {
     setIsDeleteGiftModalOpen(true);
   };
 
-
-
-
-
 // coins packages................
 
   const handleAddCoinPackage = async () => {
@@ -262,10 +260,6 @@ export default function Revenue() {
       alert("Failed to delete");
     }
   };
-
-
-
-
   //  Gift .................
   
   const handleAddGift = async () => {
@@ -396,8 +390,6 @@ export default function Revenue() {
     }
   };
   
-
-
   const handleDeleteGift = async () => {
     if (!selectedGift) return;
 
@@ -448,8 +440,6 @@ export default function Revenue() {
       alert(error.response?.data?.message || "Failed to load gifts");
     }
   };
-
-
 
   useEffect(() => {
     const fetchCoinPackages = async () => {
@@ -616,8 +606,6 @@ export default function Revenue() {
   };
 
   // Delete Entry Effect .................
-
-
   const handleDeleteEntryEffect = async (id: string) => {
     try {
       const token = localStorage.getItem("adminToken");
@@ -646,7 +634,6 @@ export default function Revenue() {
       alert(error.response?.data?.message || "Failed to delete entry effect");
     }
   };
-
 
   useEffect(() => {
     async function loadData() {
@@ -752,7 +739,6 @@ export default function Revenue() {
         </div>
       </Modal>
 
-
       {/* Edit Coin Package Modal */}
       <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Edit Coin Package">
         {selectedPackage && (
@@ -811,7 +797,6 @@ export default function Revenue() {
           </div>
         </div>
       </Modal>
-
     </div>
   );
 
@@ -1072,13 +1057,44 @@ export default function Revenue() {
                   autoPlay
                   loop
                   muted
+                  onClick={()=> setIsPreviewModalOpen(true)}
                 />
               ) : (
                 <img
                   src={newEffectPreview}
-                  className="w-24 h-24 mx-auto rounded-lg object-cover"
+                  className="w-24 h-24 mx-auto rounded-lg cursor-pointer"
+                  onClick={()=> setIsPreviewModalOpen(true)}
                 />
               )}
+
+{isPreviewModalOpen && (
+  <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+    <div className="relative">
+
+      {newEffectPreview.endsWith(".mp4") || 
+       newEffectPreview.endsWith(".webm") ? (
+        <video
+          src={newEffectPreview}
+          controls
+          autoPlay
+          className="max-w-[90vw] max-h-[90vh] rounded-lg"
+        />
+      ) : (
+        <img
+          src={newEffectPreview}
+          className="max-w-[90vw] max-h-[90vh] rounded-lg object-contain"
+        />
+      )}
+
+      <button
+        className="absolute top-2 right-2 text-white text-3xl"
+        onClick={() => setIsPreviewModalOpen(false)}
+      >
+        &times;
+      </button>
+    </div>
+  </div>
+)}
             </>
           )}
 
@@ -1177,13 +1193,6 @@ export default function Revenue() {
         </p>
 
         <div className="flex gap-4 mt-4">
-          {/* <Button
-            variant="danger"
-            className="flex-1"
-            onClick={() => handleDeleteEntryEffect(selectedEffect.id)}
-          >
-            Delete
-          </Button> */}
           <Button
             variant="danger"
             className="flex-1"
@@ -1202,9 +1211,6 @@ export default function Revenue() {
       </Modal>
     </div>
   );
-
-
-
   // -------------------- Return --------------------
   return (
     <div className="space-y-6">
