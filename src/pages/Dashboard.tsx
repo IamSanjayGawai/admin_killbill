@@ -1,11 +1,41 @@
-import { Users, Swords, AlertCircle, TrendingUp, Coins, UserX,Radio } from 'lucide-react';
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { Users, Swords, AlertCircle, TrendingUp, Coins, UserX, Radio } from 'lucide-react';
 import StatCard from '../components/StatCard';
-import Card from '../components/Card';
-
-import { generateRevenueData } from '../utils/mockData';
 
 export default function Dashboard() {
-  const revenueData = generateRevenueData(7);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeLiveStreams: 0,
+    totalRevenue: 0,
+    pendingWithdrawals: 0,
+    activeBattles: 0,
+    reportedUsers: 0,
+  });
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await axios.get("http://localhost:4000/api/admin/dashboard");
+        
+        if (res.data.success) {
+          setStats(res.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return <p className="text-center text-gray-600">Loading dashboard...</p>;
+  }
 
   return (
     <div className="space-y-6">
@@ -14,55 +44,54 @@ export default function Dashboard() {
         <p className="text-gray-600 mt-1">Welcome to Admin Panel</p>
       </div>
 
-      {/* Top Stats Section */}
+      {/* Row 1 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard
           title="Total Users"
-          value="45,892"
+          value={stats.totalUsers}
           icon={<Users size={24} />}
           color="blue"
-          
         />
+
         <StatCard
           title="Active Live Streams"
-          value="127"
+          value={stats.activeLiveStreams}
           icon={<Radio size={24} />}
           color="green"
         />
+
         <StatCard
           title="Total Revenue"
-          value="₹1,24,500"
+          value={`₹${stats.totalRevenue}`}
           icon={<Coins size={24} />}
           color="blue"
-         
         />
       </div>
 
-      {/* second row - 3 more cards*/}
-
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-
+      {/* Row 2 */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard
-          title='Pending Withdrawals'
-          value='23'
+          title="Pending Withdrawals"
+          value={stats.pendingWithdrawals}
           icon={<AlertCircle size={24} />}
-          color='yellow'
+          color="yellow"
         />
 
         <StatCard
-          title='Active Battle'
-          value='10'
+          title="Active Battle"
+          value={stats.activeBattles}
           icon={<Swords size={24} />}
-          color='green'
+          color="green"
         />
 
         <StatCard
-          title='Reported/Blocked User'
-          value='5'
+          title="Reported / Blocked Users"
+          value={stats.reportedUsers}
           icon={<UserX size={24} />}
-          color='red'
+          color="red"
         />
       </div>
     </div>
   );
 }
+
