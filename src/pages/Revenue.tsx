@@ -551,7 +551,7 @@ export default function Revenue() {
     }
   };
 
-  // Get Entry Effects .................
+  // Get Entry Effects .................    
   const fetchEntryEffects = async () => {
     try {
       const response = await axios.get(
@@ -1005,21 +1005,6 @@ export default function Revenue() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {entryEffects.map((item) => (
           <Card key={item._id} className="p-4 rounded-xl shadow-md">
-            {/* <video
-              src={item.animation}
-              controls
-              className="w-full h-40 object-contain mb-3"
-            /> */}
-
-            {/* <video
-              src={item.animation}
-              className="w-full rounded cursor-pointer"
-              onClick={() => {
-                setPreviewFile(item.animation);
-                setPreviewType("video");
-                setPreviewOpen(true);
-              }}
-            /> */}
 
             <video
               src={item.animation}
@@ -1054,45 +1039,31 @@ export default function Revenue() {
 
 
       {/* ------------------------- ADD ENTRY EFFECT MODAL ------------------------- */}
-   
+
       <Modal
-  isOpen={isEntryEffectModalOpen}
-  onClose={() => setIsEntryEffectModalOpen(false)}
-  title="Add Entry Effect"
->
-  <div className="space-y-4">
+        isOpen={isEntryEffectModalOpen}
+        onClose={() => setIsEntryEffectModalOpen(false)}
+        title="Add Entry Effect"
+      >
+        <div className="space-y-4">
 
-    <Input
-      label="Effect Name"
-      placeholder="Enter effect name"
-      value={newEffectName}
-      onChange={(e) => setNewEffectName(e.target.value)}
-    />
+          <Input
+            label="Effect Name"
+            placeholder="Enter effect name"
+            value={newEffectName}
+            onChange={(e) => setNewEffectName(e.target.value)}
+          />
 
-    <Input
-      label="Effect Coins"
-      placeholder="Enter price"
-      type="number"
-      value={newEffectCoins}
-      onChange={(e) => setNewEffectCoins(e.target.value)}
-    />
+          <Input
+            label="Effect Coins"
+            placeholder="Enter price"
+            type="number"
+            value={newEffectCoins}
+            onChange={(e) => setNewEffectCoins(e.target.value)}
+          />
 
-          {/* <Input
-            label="Upload File (Image / Video)"
-            type="file"
-            accept="image/*, video/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0] || null;
-              setNewEffectFile(file);
-              if (file) {
-                const previewURL = URL.createObjectURL(file);
-                setNewEffectPreview(previewURL);
-              }
-            }}
-          /> */}
-
-
-// When setting preview for new entry effect
+{/* // When setting preview for new entry effect */}
+        
           <Input
             type="file"
             accept="image/*,video/*"
@@ -1168,12 +1139,12 @@ export default function Revenue() {
             </>
           )}
 
-    <Button variant="primary" onClick={handleAddEntryEffect} className="w-full">
-      Add Effect
-    </Button>
+          <Button variant="primary" onClick={handleAddEntryEffect} className="w-full">
+            Add Effect
+          </Button>
 
-  </div>
-</Modal>
+        </div>
+      </Modal>
 
       {/* ------------------------- EDIT ENTRY EFFECT MODAL ------------------------- */}
       <Modal
@@ -1312,11 +1283,7 @@ export default function Revenue() {
 }
 
 
-
-
 // ------------------------- PREVIEW MODAL -------------------------
-
-
 
 
 const PreviewModal = ({ open, onClose, fileUrl, type }) => {
