@@ -7,7 +7,19 @@ import {
   TrendingDown,
   Crown,
 } from "lucide-react";
-import { GiShield, GiShieldStar, GiShieldCrown, GiShieldEchoes } from "react-icons/gi";
+import {
+  GiShield,
+  GiShieldEchoes,
+  GiShieldDisabled,
+  GiShieldReflect,
+  GiCrownedSkull,
+  GiWingedSword,
+  GiMusicalNotes,
+  GiStarShuriken,
+  GiSwordBrandish,
+}from "react-icons/gi";
+
+
 interface User {
   id: number;
   name: string;
@@ -26,21 +38,21 @@ const badgeLevels = [
 
   { title: "RISING STAR", range: [11, 20], icon: GiShieldEchoes, colors: ["#3A310C", "#5A4E1A"] },
 
-  { title: "GAME CHANGER", range: [21, 30], icon: , colors: ["#1D2E45", "#3A5B78"] },
+  { title: "GAME CHANGER", range: [21, 30], icon: GiShieldDisabled, colors: ["#1D2E45", "#3A5B78"] },
 
-  { title: "POWER PLAYER", range: [31, 40], icon: "shield-star", colors: ["#5A2600", "#A84A0D"] },
+  { title: "POWER PLAYER", range: [31, 40], icon: GiShieldReflect, colors: ["#5A2600", "#A84A0D"] },
 
-  { title: "TRUE CHAMPION", range: [41, 50], icon: "shield-account", colors: ["#1E1E1E", "#4A4A4A"] },
+  { title: "TRUE CHAMPION", range: [41, 50], icon: GiStarShuriken, colors: ["#1E1E1E", "#4A4A4A"] },
 
-  { title: "GOLDEN STRIKER", range: [51, 60], icon: "shield-crown-outline", colors: ["#664400", "#C08C00"] },
+  { title: "GOLDEN STRIKER", range: [51, 60], icon: GiCrownedSkull, colors: ["#664400", "#C08C00"] },
 
-  { title: "SKY RIDER", range: [61, 70], icon: "shield-airplane", colors: ["#003B77", "#0A89D2"] },
+  { title: "SKY RIDER", range: [61, 70], icon:GiWingedSword, colors: ["#003B77", "#0A89D2"] },
 
-  { title: "ROCKSTAR HERO", range: [71, 80], icon: "shield-cross", colors: ["#003F14", "#139E31"] },
+  { title: "ROCKSTAR HERO", range: [71, 80], icon: GiMusicalNotes, colors: ["#003F14", "#139E31"] },
 
-  { title: "SUPREME LEADER", range: [81, 90], icon: "shield-star", colors: ["#4B1561", "#A54BC6"] },
+  { title: "SUPREME LEADER", range: [81, 90], icon: GiShieldReflect, colors: ["#4B1561", "#A54BC6"] },
 
-  { title: "GRAND MASTER", range: [91, 100], icon: "shield-sword", colors: ["#5A2E00", "#D97A0A"] },
+  { title: "GRAND MASTER", range: [91, 100], icon: GiSwordBrandish, colors: ["#5A2E00", "#D97A0A"] },
   
 ];
 
@@ -67,18 +79,6 @@ const LeaderBoard: React.FC = () => {
   const topThree = users.slice(0, 3);
   const others = users.slice(3);
 
- 
-  //   switch (badge) {
-  //     case "gold":
-  //       return <Crown className="w-7 h-7 text-yellow-400" />;
-  //     case "silver":
-  //       return <Medal className="w-7 h-7 text-gray-300" />;
-  //     case "bronze":
-  //       return <Award className="w-7 h-7 text-amber-600" />;
-  //     default:
-  //       return null;
-  //   }
-  // };
 
   const format = (v: number) => (v >= 1000 ? (v / 1000).toFixed(1) + "k" : v);
 
@@ -86,9 +86,9 @@ const LeaderBoard: React.FC = () => {
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-6xl mx-auto space-y-10">
         {/* HEADER */}
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-8 rounded-2xl shadow-xl">
+        <div className="bg-gradient-to-r from-slate-700 to-slate-600 p-8 rounded-2xl shadow-xl">
           <h1 className="text-4xl font-bold text-white">Leaderboard</h1>
-          <p className="text-indigo-200 mt-1">Track top performers in real-time</p>
+          <p className="text-slate-300 mt-1">Track top performers in real-time</p>
         </div>
 
         {/* TOP 3 CARDS */}
@@ -102,14 +102,14 @@ const LeaderBoard: React.FC = () => {
               >
                 {/* Rank Badge */}
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <div className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold shadow-lg">
+                  <div className="w-10 h-10 rounded-full bg-slate-600 text-white flex items-center justify-center font-bold shadow-lg">
                     #{u.rank}
                   </div>
                 </div>
 
                 <img
                   src={u.avatar}
-                  className="w-20 h-20 rounded-full border-4 border-indigo-200 shadow mt-6"
+                  className="w-20 h-20 rounded-full border-4 border-slate-200 shadow mt-6"
                 />
 
                 <h3 className="text-lg mt-3 font-semibold">{u.name}</h3>
@@ -123,7 +123,7 @@ const LeaderBoard: React.FC = () => {
                         background: `linear-gradient(135deg, ${badge.colors[0]}, ${badge.colors[1]})`,
                       }}
                     >
-                      {badge.icon}
+                       <badge.icon className="w-6 h-6" />
                     </span>
                   ) : (
                     <span className="text-gray-300">—</span>
@@ -154,7 +154,7 @@ const LeaderBoard: React.FC = () => {
               onClick={() => setActiveTab(tab)}
               className={`pb-2 font-semibold transition-all duration-200 ${
                 activeTab === tab
-                  ? "text-indigo-600 border-b-2 border-indigo-600"
+                  ? "text-slate-700 border-b-2 border-slate-700"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -169,7 +169,7 @@ const LeaderBoard: React.FC = () => {
         <div className="overflow-x-auto">
           <div className="min-w-full bg-white rounded-xl shadow-lg overflow-hidden">
             {/* TABLE HEADER */}
-            <div className="grid grid-cols-[60px_80px_60px_1fr_100px_100px_100px] px-6 py-4 bg-gray-50 font-semibold text-gray-600">
+            <div className="grid grid-cols-[60px_80px_60px_auto_100px_100px_100px] gap-4 px-6 py-4 bg-gray-50 font-semibold text-gray-600">
               <div className="text-center">Rank</div>
               <div className="text-center">Badge</div>
               <div className="text-center">Lvl</div>
@@ -186,7 +186,7 @@ const LeaderBoard: React.FC = () => {
                 return (
                   <div
                     key={u.id}
-                    className="grid grid-cols-[60px_80px_60px_1fr_100px_100px_100px] px-6 py-5 items-center hover:bg-gray-50 transition"
+                    className="grid grid-cols-[60px_80px_60px_auto_100px_100px_100px] gap-4 px-6 py-5 items-center hover:bg-gray-50 transition"
                   >
                     <div className="text-center font-semibold text-gray-700">{u.rank}</div>
 
@@ -198,7 +198,7 @@ const LeaderBoard: React.FC = () => {
                             background: `linear-gradient(135deg, ${badge.colors[0]}, ${badge.colors[1]})`,
                           }}
                         >
-                          {badge.icon}
+                           <badge.icon className="w-6 h-6" />
                         </span>
                       ) : (
                         <span className="text-gray-400">—</span>
@@ -217,7 +217,7 @@ const LeaderBoard: React.FC = () => {
 
                     <div className="text-center text-red-600 font-semibold">{format(u.spentCoins)}</div>
                     <div className="text-center text-green-600 font-semibold">{format(u.earnedCoins)}</div>
-                    <div className="text-center font-semibold text-blue-600">{format(u.followers)}</div>
+                    <div className="text-center font-semibold text-slate-600">{format(u.followers)}</div>
                   </div>
                 );
               })}

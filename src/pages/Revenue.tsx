@@ -53,7 +53,7 @@ export default function Revenue() {
 
   // ---------------- Entry Effects ----------------
   const [entryEffects, setEntryEffects] = useState<any[]>([]);
-  const [effects, setEffects] = useState([]);
+  // const [effects, setEffects] = useState([]);
   const [isEditEntryEffectModalOpen, setIsEditEntryEffectModalOpen] = useState(false);
   const [isDeleteEntryEffectModalOpen, setIsDeleteEntryEffectModalOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -595,7 +595,7 @@ export default function Revenue() {
 
       if (response.data.success) {
         // Update effects state immediately with backend response
-        setEffects((prev) =>
+        setEntryEffects((prev) =>
           prev.map((ef) =>
             ef._id === selectedEffect._id ? response.data.data : ef
           )
@@ -630,7 +630,7 @@ export default function Revenue() {
 
       if (response.data.success) {
         // Remove the entry effect from frontend state
-        setEffects((prev) => prev.filter((efe) => efe._id !== id));
+        setEntryEffects((prev) => prev.filter((efe) => efe._id !== id));
         alert("Entry effect deleted successfully!");
         setIsDeleteEntryEffectModalOpen(false);
         setSelectedEffect(null);
@@ -647,7 +647,7 @@ export default function Revenue() {
     async function loadData() {
       try {
         const res = await fetchEntryEffects();
-        setEffects(res.data); // backend returns {success, data}
+        setEntryEffects(res.data); // backend returns {success, data}
       } catch (err) {
         console.log(err);
       }
@@ -1003,7 +1003,7 @@ export default function Revenue() {
 
       {/* entry effect View tab */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {effects.map((item) => (
+        {entryEffects.map((item) => (
           <Card key={item._id} className="p-4 rounded-xl shadow-md">
             {/* <video
               src={item.animation}
