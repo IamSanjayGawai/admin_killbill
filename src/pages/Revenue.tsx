@@ -49,7 +49,7 @@ export default function Revenue() {
   const [newBonus, setNewBonus] = useState("");
   const [editCoinCount, setEditCoinCount] = useState("");
   const [editCoinPrice, setEditCoinPrice] = useState("");
-  
+
 
   // ---------------- Entry Effects ----------------
   const [entryEffects, setEntryEffects] = useState<any[]>([]);
@@ -170,7 +170,7 @@ export default function Revenue() {
     setIsDeleteGiftModalOpen(true);
   };
 
-// coins packages................
+  // coins packages................
 
   const handleAddCoinPackage = async () => {
     if (!newPackage.title || !newPackage.coins || !newPackage.price) {
@@ -263,7 +263,7 @@ export default function Revenue() {
     }
   };
   //  Gift .................
-  
+
   const handleAddGift = async () => {
     try {
       // Validation
@@ -350,19 +350,19 @@ export default function Revenue() {
   const handleSaveGiftEdit = async () => {
     try {
       if (!selectedGift) return alert("No gift selected!");
-  
+
       const token = localStorage.getItem("adminToken");
       const formData = new FormData();
-  
+
       // name & price
       formData.append("name", selectedGift.name);
       formData.append("price", selectedGift.price);
-  
+
       // If a new icon file was uploaded
       if (selectedGift.newIconFile) {
         formData.append("icon", selectedGift.newIconFile);
       }
-  
+
       const response = await axios.put(
         `http://localhost:4000/api/admin/gift/${selectedGift._id}`,
         formData,
@@ -373,7 +373,7 @@ export default function Revenue() {
           },
         }
       );
-  
+
       if (response.data.success) {
         // Update UI
         setGifts((prev) =>
@@ -381,7 +381,7 @@ export default function Revenue() {
             g._id === selectedGift._id ? response.data.data : g
           )
         );
-  
+
         alert("Gift updated successfully!");
         setIsEditGiftModalOpen(false);
         setSelectedGift(null);
@@ -391,7 +391,7 @@ export default function Revenue() {
       alert(error.response?.data?.message || "Failed to update gift");
     }
   };
-  
+
   const handleDeleteGift = async () => {
     if (!selectedGift) return;
 
@@ -1011,101 +1011,103 @@ export default function Revenue() {
 
 
       {/* ------------------------- ADD ENTRY EFFECT MODAL ------------------------- */}
+   
       <Modal
-        isOpen={isEntryEffectModalOpen}
-        onClose={() => setIsEntryEffectModalOpen(false)}
-        title="Add Entry Effect"
-      >
-        <div className="space-y-4">
+  isOpen={isEntryEffectModalOpen}
+  onClose={() => setIsEntryEffectModalOpen(false)}
+  title="Add Entry Effect"
+>
+  <div className="space-y-4">
 
-          <Input
-            label="Effect Name"
-            placeholder="Enter effect name"
-            value={newEffectName}
-            onChange={(e) => setNewEffectName(e.target.value)}
+    <Input
+      label="Effect Name"
+      placeholder="Enter effect name"
+      value={newEffectName}
+      onChange={(e) => setNewEffectName(e.target.value)}
+    />
+
+    <Input
+      label="Effect Coins"
+      placeholder="Enter price"
+      type="number"
+      value={newEffectCoins}
+      onChange={(e) => setNewEffectCoins(e.target.value)}
+    />
+
+    <Input
+      label="Upload File (Image / Video)"
+      type="file"
+      accept="image/*, video/*"
+      onChange={(e) => {
+        const file = e.target.files?.[0] || null;
+        setNewEffectFile(file);
+        if (file) {
+          const previewURL = URL.createObjectURL(file);
+          setNewEffectPreview(previewURL);
+        }
+      }}
+    />
+
+    {/* Preview Uploaded File */}
+    {newEffectPreview && (
+      <>
+        {/* Thumbnail */}
+        {newEffectPreview.endsWith(".mp4") ||
+        newEffectPreview.endsWith(".webm") ? (
+          <video
+            src={newEffectPreview}
+            className="w-24 h-24 mx-auto rounded-lg cursor-pointer"
+            autoPlay
+            loop
+            muted
+            onClick={() => setIsPreviewModalOpen(true)}
           />
-
-          <Input
-            label="Effect Coins"
-            placeholder="Enter price"
-            type="number"
-            value={newEffectCoins}
-            onChange={(e) => setNewEffectCoins(e.target.value)}
+        ) : (
+          <img
+            src={newEffectPreview}
+            className="w-24 h-24 mx-auto rounded-lg cursor-pointer"
+            onClick={() => setIsPreviewModalOpen(true)}
           />
+        )}
 
-          <Input
-            label="Upload File (Image / Video)"
-            type="file"
-            accept="image/*, video/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0] || null;
-              setNewEffectFile(file);
-              if (file) {
-                const previewURL = URL.createObjectURL(file);
-                setNewEffectPreview(previewURL);
-              }
-            }}
-          />
+        {/* Full Preview Modal */}
+        {isPreviewModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+            <div className="relative">
 
-          {/* Preview Uploaded File */}
-          {newEffectPreview && (
-            <>
-              {newEffectPreview.includes("video") ||
-                newEffectPreview.endsWith(".mp4") ||
-                newEffectPreview.endsWith(".webm") ? (
+              {newEffectPreview.endsWith(".mp4") ||
+              newEffectPreview.endsWith(".webm") ? (
                 <video
                   src={newEffectPreview}
-                  className="w-24 h-24 mx-auto rounded-lg"
+                  controls
                   autoPlay
-                  loop
-                  muted
-                  onClick={()=> setIsPreviewModalOpen(true)}
+                  className="max-w-[80vw] max-h-[80vh] rounded-lg object-contain"
                 />
               ) : (
                 <img
                   src={newEffectPreview}
-                  className="w-24 h-24 mx-auto rounded-lg cursor-pointer"
-                  onClick={()=> setIsPreviewModalOpen(true)}
+                  className="max-w-[80vw] max-h-[80vh] rounded-lg object-contain"
                 />
               )}
 
-{isPreviewModalOpen && (
-  <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-    <div className="relative">
+              <button
+                className="absolute top-2 right-2 text-white text-3xl"
+                onClick={() => setIsPreviewModalOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
+      </>
+    )}
 
-      {newEffectPreview.endsWith(".mp4") || 
-       newEffectPreview.endsWith(".webm") ? (
-        <video
-          src={newEffectPreview}
-          controls
-          autoPlay
-          className="max-w-[90vw] max-h-[90vh] rounded-lg"
-        />
-      ) : (
-        <img
-          src={newEffectPreview}
-          className="max-w-[90vw] max-h-[90vh] rounded-lg object-contain"
-        />
-      )}
+    <Button variant="primary" onClick={handleAddEntryEffect} className="w-full">
+      Add Effect
+    </Button>
 
-      <button
-        className="absolute top-2 right-2 text-white text-3xl"
-        onClick={() => setIsPreviewModalOpen(false)}
-      >
-        &times;
-      </button>
-    </div>
   </div>
-)}
-            </>
-          )}
-
-          <Button variant="primary" onClick={handleAddEntryEffect} className="w-full">
-            Add Effect
-          </Button>
-
-        </div>
-      </Modal>
+</Modal>
 
       {/* ------------------------- EDIT ENTRY EFFECT MODAL ------------------------- */}
       <Modal

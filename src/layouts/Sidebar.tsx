@@ -11,8 +11,10 @@ import {
   Menu,
   X,
   UserCheck,
-  Banknote 
+  Banknote ,
+  Trophy
 } from 'lucide-react';
+import LeaderBoard from '../pages/LeaderBoard';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -31,8 +33,10 @@ const menuItems: MenuItem[] = [
   { path: '/streamers', icon: UserCheck, label: 'Streamer Management' },
    { path: '/revenue', icon: Coins, label: 'Coins & Revenue' },
    { path: '/withdrawals', icon:  Banknote, label: 'Withdrawal Requests' },
+   { path: '/leaderboard',icon:Trophy,label:'LeaderBoard'},
   { path: '/reports', icon: BarChart3, label: 'Reports & Analytics' },
-  { path: '/settings', icon: Settings, label: 'Settings' }
+  { path: '/settings', icon: Settings, label: 'Settings' },
+  
 ];
 
 export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {

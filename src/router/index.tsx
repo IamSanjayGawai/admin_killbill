@@ -9,7 +9,7 @@ import Settings from '../pages/Settings';
 import AdminLogin from '../pages/AdminLogin';
 import WithdrawalRequests from '../pages/WithdrawalRequest';
 import ProtectedRoute from './ProtectedRoute';
-
+import LeaderBoard from '../pages/LeaderBoard'
 export const router = createBrowserRouter([
   {
     path: '/login',
@@ -43,6 +43,10 @@ export const router = createBrowserRouter([
       {
         path: 'withdrawals',
         element: <WithdrawalRequests />
+      },
+      {
+        path: 'leaderboard',
+        element: <LeaderBoard />
       },
       {
         path: 'reports',
