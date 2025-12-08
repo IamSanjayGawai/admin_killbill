@@ -7,7 +7,7 @@ import Modal from "../components/Modal";
 import Tabs from "../components/Tabs";
 import axios from "axios";
 import { Plus, Edit, Trash2, Coins as CoinsIcon, Coins } from "lucide-react";
-// import { generateMockCoinPackages, generateMockGifts } from "../utils/mockData";
+
 
 export default function Revenue() {
   // ---------------- Modal States ----------------
@@ -49,7 +49,7 @@ export default function Revenue() {
   const [newBonus, setNewBonus] = useState("");
   const [editCoinCount, setEditCoinCount] = useState("");
   const [editCoinPrice, setEditCoinPrice] = useState("");
-  
+
 
   // ---------------- Entry Effects ----------------
   const [entryEffects, setEntryEffects] = useState<any[]>([]);
@@ -73,6 +73,12 @@ export default function Revenue() {
 
   const [newEffectImagePreview, setNewEffectImagePreview] = useState(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+
+
+  // Preview Modal State
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewFile, setPreviewFile] = useState("");
+  const [previewType, setPreviewType] = useState(""); // 'image' | 'video'
 
 
   // ---------------- Entry Effect Functions ----------------
@@ -170,7 +176,7 @@ export default function Revenue() {
     setIsDeleteGiftModalOpen(true);
   };
 
-// coins packages................
+  // coins packages................
 
   const handleAddCoinPackage = async () => {
     if (!newPackage.title || !newPackage.coins || !newPackage.price) {
@@ -263,7 +269,7 @@ export default function Revenue() {
     }
   };
   //  Gift .................
-  
+
   const handleAddGift = async () => {
     try {
       // Validation
@@ -350,19 +356,19 @@ export default function Revenue() {
   const handleSaveGiftEdit = async () => {
     try {
       if (!selectedGift) return alert("No gift selected!");
-  
+
       const token = localStorage.getItem("adminToken");
       const formData = new FormData();
-  
+
       // name & price
       formData.append("name", selectedGift.name);
       formData.append("price", selectedGift.price);
-  
+
       // If a new icon file was uploaded
       if (selectedGift.newIconFile) {
         formData.append("icon", selectedGift.newIconFile);
       }
-  
+
       const response = await axios.put(
         `http://localhost:4000/api/admin/gift/${selectedGift._id}`,
         formData,
@@ -373,7 +379,7 @@ export default function Revenue() {
           },
         }
       );
-  
+
       if (response.data.success) {
         // Update UI
         setGifts((prev) =>
@@ -381,7 +387,7 @@ export default function Revenue() {
             g._id === selectedGift._id ? response.data.data : g
           )
         );
-  
+
         alert("Gift updated successfully!");
         setIsEditGiftModalOpen(false);
         setSelectedGift(null);
@@ -391,7 +397,7 @@ export default function Revenue() {
       alert(error.response?.data?.message || "Failed to update gift");
     }
   };
-  
+
   const handleDeleteGift = async () => {
     if (!selectedGift) return;
 
@@ -816,7 +822,18 @@ export default function Revenue() {
         {gifts.map((gift) => (
           <Card key={gift._id} className="p-6 text-center rounded-3xl shadow-md hover:shadow-lg transition-all duration-200">
             <div className="text-5xl mb-3">
-              <img src={gift.icon} alt="gift icon" />
+              {/* <img src={gift.icon} alt="gift icon" /> */}
+
+              <img
+                src={gift.icon}
+                className="w-full h-40 object-cover cursor-pointer"
+                onClick={() => {
+                  setPreviewFile(gift.icon);
+                  setPreviewType("image");
+                  setPreviewOpen(true);
+                }}
+              />
+
 
             </div>
             <p className="font-semibold text-gray-900 mb-1">{gift.name}</p>
@@ -988,11 +1005,37 @@ export default function Revenue() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {effects.map((item) => (
           <Card key={item._id} className="p-4 rounded-xl shadow-md">
-            <video
+            {/* <video
               src={item.animation}
               controls
               className="w-full h-40 object-contain mb-3"
+            /> */}
+
+            {/* <video
+              src={item.animation}
+              className="w-full rounded cursor-pointer"
+              onClick={() => {
+                setPreviewFile(item.animation);
+                setPreviewType("video");
+                setPreviewOpen(true);
+              }}
+            /> */}
+
+            <video
+              src={item.animation}
+              className="w-full rounded cursor-pointer"
+              onClick={() => {
+                setPreviewFile(item.animation);
+
+                // Detect if the URL is a video
+                const isVideo = item.animation.endsWith(".mp4") || item.animation.endsWith(".webm") || item.animation.includes(".mp4");
+                setPreviewType(isVideo ? "video" : "image");
+
+                setPreviewOpen(true);
+              }}
             />
+
+
             <p className="font-semibold text-gray-900">{item.title}</p>
             <p className="text-blue-600 font-bold">{item.price} coins</p>
 
@@ -1033,7 +1076,7 @@ export default function Revenue() {
             onChange={(e) => setNewEffectCoins(e.target.value)}
           />
 
-          <Input
+          {/* <Input
             label="Upload File (Image / Video)"
             type="file"
             accept="image/*, video/*"
@@ -1045,7 +1088,31 @@ export default function Revenue() {
                 setNewEffectPreview(previewURL);
               }
             }}
+          /> */}
+
+
+// When setting preview for new entry effect
+          <Input
+            type="file"
+            accept="image/*,video/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0] || null;
+              setNewEffectFile(file);
+
+              if (file) {
+                const previewURL = URL.createObjectURL(file);
+                setNewEffectPreview(previewURL);
+
+                // Detect type properly
+                if (file.type.startsWith("video/")) {
+                  setPreviewType("video");
+                } else {
+                  setPreviewType("image");
+                }
+              }
+            }}
           />
+
 
           {/* Preview Uploaded File */}
           {newEffectPreview && (
@@ -1059,44 +1126,44 @@ export default function Revenue() {
                   autoPlay
                   loop
                   muted
-                  onClick={()=> setIsPreviewModalOpen(true)}
+                  onClick={() => setIsPreviewModalOpen(true)}
                 />
               ) : (
                 <img
                   src={newEffectPreview}
                   className="w-24 h-24 mx-auto rounded-lg cursor-pointer"
-                  onClick={()=> setIsPreviewModalOpen(true)}
+                  onClick={() => setIsPreviewModalOpen(true)}
                 />
               )}
 
-{isPreviewModalOpen && (
-  <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-    <div className="relative">
+              {isPreviewModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+                  <div className="relative">
 
-      {newEffectPreview.endsWith(".mp4") || 
-       newEffectPreview.endsWith(".webm") ? (
-        <video
-          src={newEffectPreview}
-          controls
-          autoPlay
-          className="max-w-[90vw] max-h-[90vh] rounded-lg"
-        />
-      ) : (
-        <img
-          src={newEffectPreview}
-          className="max-w-[90vw] max-h-[90vh] rounded-lg object-contain"
-        />
-      )}
+                    {newEffectPreview.endsWith(".mp4") ||
+                      newEffectPreview.endsWith(".webm") ? (
+                      <video
+                        src={newEffectPreview}
+                        controls
+                        autoPlay
+                        className="max-w-[90vw] max-h-[90vh] rounded-lg"
+                      />
+                    ) : (
+                      <img
+                        src={newEffectPreview}
+                        className="max-w-[90vw] max-h-[90vh] rounded-lg object-contain"
+                      />
+                    )}
 
-      <button
-        className="absolute top-2 right-2 text-white text-3xl"
-        onClick={() => setIsPreviewModalOpen(false)}
-      >
-        &times;
-      </button>
-    </div>
-  </div>
-)}
+                    <button
+                      className="absolute top-2 right-2 text-white text-3xl"
+                      onClick={() => setIsPreviewModalOpen(false)}
+                    >
+                      &times;
+                    </button>
+                  </div>
+                </div>
+              )}
             </>
           )}
 
@@ -1213,6 +1280,8 @@ export default function Revenue() {
       </Modal>
     </div>
   );
+
+
   // -------------------- Return --------------------
   return (
     <div className="space-y-6">
@@ -1229,9 +1298,96 @@ export default function Revenue() {
           { key: "entryEffects", label: "Entry Effects", content: entryEffectsTab },
         ]}
       />
+
+      <PreviewModal
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        fileUrl={previewFile}
+        type={previewType}
+      />
+
     </div>
   );
 }
 
+
+
+
+// ------------------------- PREVIEW MODAL -------------------------
+
+// const PreviewModal = ({ open, onClose, fileUrl, type }) => {
+//   if (!open) return null;
+
+//   return (
+//     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999]">
+//       <div className="bg-white rounded-lg shadow-xl p-4 max-w-3xl w-full relative">
+
+//         {/* Close Button */}
+//         <button
+//           className="absolute top-3 right-3 bg-gray-200 hover:bg-gray-300 rounded-full px-3 py-1 text-sm font-semibold"
+//           onClick={onClose}
+//         >
+//           ✕
+//         </button>
+
+//         {/* Media Preview */}
+//         <div className="flex justify-center items-center p-4">
+//           {type === "video" ? (
+//             <video
+//               src={fileUrl}
+//               controls
+//               autoPlay
+//               className="max-h-[70vh] rounded-lg"
+//             />
+//           ) : (
+//             <img
+//               src={fileUrl}
+//               alt="Preview"
+//               className="max-h-[70vh] rounded-lg object-contain"
+//             />
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+
+const PreviewModal = ({ open, onClose, fileUrl, type }) => {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999]">
+      <div className="bg-white rounded-lg shadow-xl p-4 max-w-3xl w-full relative">
+
+        {/* Close Button */}
+        <button
+          className="absolute top-3 right-3 bg-gray-200 hover:bg-gray-300 rounded-full px-3 py-1 text-sm font-semibold"
+          onClick={onClose}
+        >
+          ✕
+        </button>
+
+        {/* Media Preview */}
+        <div className="flex justify-center items-center p-4">
+          {type === "video" ? (
+            <video
+              src={fileUrl}
+              controls
+              autoPlay
+              className="max-h-[70vh] rounded-lg"
+            />
+          ) : (
+            <img
+              src={fileUrl}
+              alt="Preview"
+              className="max-h-[70vh] rounded-lg object-contain"
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 
