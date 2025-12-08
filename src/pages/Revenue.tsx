@@ -1062,8 +1062,22 @@ export default function Revenue() {
             onChange={(e) => setNewEffectCoins(e.target.value)}
           />
 
+          {/* <Input
+            label="Upload File (Image / Video)"
+            type="file"
+            accept="image/*, video/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0] || null;
+              setNewEffectFile(file);
+              if (file) {
+                const previewURL = URL.createObjectURL(file);
+                setNewEffectPreview(previewURL);
+              }
+            }}
+          /> */}
+
+
 {/* // When setting preview for new entry effect */}
-        
           <Input
             type="file"
             accept="image/*,video/*"
@@ -1284,6 +1298,7 @@ export default function Revenue() {
 
 
 // ------------------------- PREVIEW MODAL -------------------------
+
 
 
 const PreviewModal = ({ open, onClose, fileUrl, type }) => {
