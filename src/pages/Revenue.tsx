@@ -1092,7 +1092,7 @@ export default function Revenue() {
           /> */}
 
 
-// When setting preview for new entry effect
+{/* // When setting preview for new entry effect */}
           <Input
             type="file"
             accept="image/*,video/*"
@@ -1312,46 +1312,8 @@ export default function Revenue() {
 }
 
 
-
-
 // ------------------------- PREVIEW MODAL -------------------------
 
-// const PreviewModal = ({ open, onClose, fileUrl, type }) => {
-//   if (!open) return null;
-
-//   return (
-//     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999]">
-//       <div className="bg-white rounded-lg shadow-xl p-4 max-w-3xl w-full relative">
-
-//         {/* Close Button */}
-//         <button
-//           className="absolute top-3 right-3 bg-gray-200 hover:bg-gray-300 rounded-full px-3 py-1 text-sm font-semibold"
-//           onClick={onClose}
-//         >
-//           ✕
-//         </button>
-
-//         {/* Media Preview */}
-//         <div className="flex justify-center items-center p-4">
-//           {type === "video" ? (
-//             <video
-//               src={fileUrl}
-//               controls
-//               autoPlay
-//               className="max-h-[70vh] rounded-lg"
-//             />
-//           ) : (
-//             <img
-//               src={fileUrl}
-//               alt="Preview"
-//               className="max-h-[70vh] rounded-lg object-contain"
-//             />
-//           )}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
 
 
 const PreviewModal = ({ open, onClose, fileUrl, type }) => {
