@@ -1,3 +1,143 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --accent-color: #3b82f6;
+  --background-color: #f4f6fb;
+  --surface-color: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --border-color: #e5e7eb;
+  --muted-color: #6b7280;
+  --shadow-elevated: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+body.theme-light {
+  color-scheme: light;
+}
+
+body.theme-dark {
+  color-scheme: dark;
+  --background-color: #0b1220;
+  --surface-color: #111827;
+  --text-primary: #e2e8f0;
+  --text-secondary: #cbd5e1;
+  --border-color: #1f2937;
+  --muted-color: #94a3b8;
+  --shadow-elevated: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+body {
+  background: var(--background-color);
+  color: var(--text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.app-shell {
+  background: var(--background-color);
+  color: var(--text-primary);
+}
+
+.surface-card {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-elevated);
+}
+
+.surface-divider {
+  border-color: var(--border-color);
+}
+
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.muted {
+  color: var(--muted-color);
+}
+
+.btn-primary {
+  background: var(--accent-color);
+  color: #fff;
+  border: 1px solid transparent;
+}
+
+.btn-primary:hover {
+  filter: brightness(0.92);
+}
+
+.btn-secondary {
+  background: rgba(148, 163, 184, 0.15);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background: rgba(148, 163, 184, 0.25);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.themed-input {
+  background: var(--surface-color);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.themed-input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 35%, transparent);
+}
+
+body.theme-dark .bg-white {
+  background: var(--surface-color) !important;
+}
+
+body.theme-dark .bg-gray-100 {
+  background: #0f172a !important;
+}
+
+body.theme-dark .bg-gray-50 {
+  background: #111827 !important;
+}
+
+body.theme-dark .bg-blue-50 {
+  background: rgba(59, 130, 246, 0.12) !important;
+}
+
+body.theme-dark .text-gray-900,
+body.theme-dark .text-gray-800,
+body.theme-dark .text-gray-700,
+body.theme-dark .text-gray-600 {
+  color: var(--text-primary) !important;
+}
+
+body.theme-dark .text-gray-500,
+body.theme-dark .text-gray-400 {
+  color: var(--text-secondary) !important;
+}
+
+body.theme-dark .text-blue-900,
+body.theme-dark .text-blue-800,
+body.theme-dark .text-blue-700,
+body.theme-dark .text-blue-600 {
+  color: var(--text-primary) !important;
+}
+
+body.theme-dark .border-gray-200,
+body.theme-dark .border-gray-300 {
+  border-color: var(--border-color) !important;
+}
+
+body.theme-dark .hover\\:bg-gray-100:hover {
+  background: #1f2937 !important;
+}

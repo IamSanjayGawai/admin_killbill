@@ -1,14 +1,44 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import Input from '../components/Input';
 import Select from '../components/Select';
 import Tabs from '../components/Tabs';
 import { Bell, Moon, Sun, CreditCard } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Settings() {
-  const [theme, setTheme] = useState('light');
+  const {
+    mode,
+    accentColor,
+    setMode,
+    setAccentColor,
+    saveTheme,
+    refresh,
+    loading,
+    saving,
+    error,
+    lastSyncedAt,
+    dirty
+  } = useTheme();
   const [notificationMessage, setNotificationMessage] = useState('');
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!dirty) {
+      setStatusMessage(null);
+    }
+  }, [dirty]);
+
+  const handleSaveTheme = async () => {
+    try {
+      setStatusMessage(null);
+      await saveTheme();
+      setStatusMessage('Theme saved successfully');
+    } catch (e: any) {
+      setStatusMessage(e?.message || 'Failed to save theme');
+    }
+  };
 
   const appConfigTab = (
     <div className="space-y-6">
@@ -136,15 +166,31 @@ export default function Settings() {
   const themeTab = (
     <Card title="Appearance Settings">
       <div className="space-y-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-primary font-medium">Theme Preferences</p>
+            <p className="text-sm muted">
+              Personalize the admin console and sync your preference across sessions.
+            </p>
+          </div>
+          <div className="text-right text-sm muted">
+            {dirty ? (
+              <span className="text-[var(--accent-color)] font-medium">Unsaved changes</span>
+            ) : (
+              lastSyncedAt && <span>Updated {new Date(lastSyncedAt).toLocaleString()}</span>
+            )}
+          </div>
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-3">
             Theme Preference
           </label>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button
-              onClick={() => setTheme('light')}
+              onClick={() => setMode('light')}
               className={`p-4 border-2 rounded-lg transition-all ${
-                theme === 'light' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                mode === 'light' ? 'border-[var(--accent-color)] bg-blue-50' : 'border-gray-200 hover:border-gray-300'
               }`}
             >
               <Sun className="mx-auto mb-2 text-yellow-500" size={32} />
@@ -153,9 +199,9 @@ export default function Settings() {
             </button>
 
             <button
-              onClick={() => setTheme('dark')}
+              onClick={() => setMode('dark')}
               className={`p-4 border-2 rounded-lg transition-all ${
-                theme === 'dark' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                mode === 'dark' ? 'border-[var(--accent-color)] bg-blue-50' : 'border-gray-200 hover:border-gray-300'
               }`}
             >
               <Moon className="mx-auto mb-2 text-gray-700" size={32} />
@@ -164,9 +210,9 @@ export default function Settings() {
             </button>
 
             <button
-              onClick={() => setTheme('auto')}
+              onClick={() => setMode('auto')}
               className={`p-4 border-2 rounded-lg transition-all ${
-                theme === 'auto' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                mode === 'auto' ? 'border-[var(--accent-color)] bg-blue-50' : 'border-gray-200 hover:border-gray-300'
               }`}
             >
               <div className="mx-auto mb-2 flex justify-center">
@@ -187,14 +233,29 @@ export default function Settings() {
             {['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'].map((color) => (
               <button
                 key={color}
-                className="w-12 h-12 rounded-lg border-2 border-gray-300 hover:scale-110 transition-transform"
+                className={`w-12 h-12 rounded-lg border-2 transition-transform ${
+                  accentColor === color
+                    ? 'border-[var(--accent-color)] scale-105'
+                    : 'border-gray-300 hover:scale-110'
+                }`}
                 style={{ backgroundColor: color }}
+                onClick={() => setAccentColor(color)}
               />
             ))}
           </div>
         </div>
 
-        <Button variant="primary">Apply Theme</Button>
+        {error && <p className="text-red-600 text-sm">{error}</p>}
+        {statusMessage && <p className="text-green-600 text-sm">{statusMessage}</p>}
+
+        <div className="flex items-center gap-3">
+          <Button variant="primary" onClick={handleSaveTheme} disabled={saving || loading}>
+            {saving ? 'Saving…' : 'Save & Apply'}
+          </Button>
+          <Button variant="secondary" onClick={() => refresh()} disabled={saving}>
+            Reload from server
+          </Button>
+        </div>
       </div>
     </Card>
   );
