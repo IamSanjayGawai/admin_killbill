@@ -5,6 +5,7 @@ import Button from "../components/Button";
 import Input from "../components/Input";
 import Modal from "../components/Modal";
 import Tabs from "../components/Tabs";
+import getMediaType from "../utils/mediatype"
 import axios from "axios";
 import { Plus, Edit, Trash2, Coins as CoinsIcon, Coins } from "lucide-react";
 
@@ -15,7 +16,6 @@ export default function Revenue() {
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
 
   const [isEntryEffectModalOpen, setIsEntryEffectModalOpen] = useState(false);
   const [isEditGiftModalOpen, setIsEditGiftModalOpen] = useState(false);
@@ -575,7 +575,7 @@ export default function Revenue() {
       if (!token) throw new Error("Admin token not found");
 
       const formData = new FormData();
-      formData.append("title", selectedEffect.name);
+      formData.append("title", selectedEffect.title);
       formData.append("price", String(selectedEffect.price));
 
       if (selectedEffect.newFile) {
@@ -1001,41 +1001,73 @@ export default function Revenue() {
         </Button>
       </div>
 
-      {/* entry effect View tab */}
+      {/* ---------------- ENTRY EFFECT VIEW TAB ---------------- */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {entryEffects.map((item) => (
-          <Card key={item._id} className="p-4 rounded-xl shadow-md">
+        {entryEffects.map((item) => {
+          const mediaType = getMediaType(item.animation);
 
-            <video
-              src={item.animation}
-              className="w-full rounded cursor-pointer"
-              onClick={() => {
-                setPreviewFile(item.animation);
+          return (
+            <Card key={item._id} className="p-4 rounded-xl shadow-md">
 
-                // Detect if the URL is a video
-                const isVideo = item.animation.endsWith(".mp4") || item.animation.endsWith(".webm") || item.animation.includes(".mp4");
-                setPreviewType(isVideo ? "video" : "image");
+              {/* Media Preview */}
+              {mediaType === "video" ? (
+                <video
+                  src={item.animation}
+                  className="w-full h-40 rounded cursor-pointer object-cover"
+                  muted
+                  playsInline
+                  preload="metadata"
+                  onClick={() => {
+                    setPreviewFile(item.animation);
+                    setPreviewType("video");
+                    setPreviewOpen(true);
+                  }}
+                />
+              ) : (
+                <img
+                  src={item.animation}
+                  alt={item.title}
+                  className="w-full h-40 rounded cursor-pointer object-cover"
+                  onClick={() => {
+                    setPreviewFile(item.animation);
+                    setPreviewType("image");
+                    setPreviewOpen(true);
+                  }}
+                />
+              )}
 
-                setPreviewOpen(true);
-              }}
-            />
+              {/* Effect Info */}
+              <p className="font-semibold text-gray-900 mt-2">{item.title}</p>
+              <p className="text-blue-600 font-bold">{item.price} coins</p>
 
+              {/* Actions */}
+              <div className="flex gap-2 justify-center mt-3">
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setSelectedEffect(item);
+                    setIsEditEntryEffectModalOpen(true);
+                  }}
+                >
+                  Edit
+                </Button>
 
-            <p className="font-semibold text-gray-900">{item.title}</p>
-            <p className="text-blue-600 font-bold">{item.price} coins</p>
-
-            <div className="flex gap-2 justify-center mt-3">
-              <Button size="sm" onClick={() => { setSelectedEffect(item); setIsEditEntryEffectModalOpen(true); }}>
-                Edit
-              </Button>
-
-              <Button size="sm" variant="danger" onClick={() => { setSelectedEffect(item); setIsDeleteEntryEffectModalOpen(true); }}>
-                Delete
-              </Button>
-            </div>
-          </Card>
-        ))}
+                <Button
+                  size="sm"
+                  variant="danger"
+                  onClick={() => {
+                    setSelectedEffect(item);
+                    setIsDeleteEntryEffectModalOpen(true);
+                  }}
+                >
+                  Delete
+                </Button>
+              </div>
+            </Card>
+          );
+        })}
       </div>
+
 
 
       {/* ------------------------- ADD ENTRY EFFECT MODAL ------------------------- */}
@@ -1077,7 +1109,7 @@ export default function Revenue() {
           /> */}
 
 
-{/* // When setting preview for new entry effect */}
+          {/* // When setting preview for new entry effect */}
           <Input
             type="file"
             accept="image/*,video/*"
@@ -1103,12 +1135,11 @@ export default function Revenue() {
           {/* Preview Uploaded File */}
           {newEffectPreview && (
             <>
-              {newEffectPreview.includes("video") ||
-                newEffectPreview.endsWith(".mp4") ||
-                newEffectPreview.endsWith(".webm") ? (
+              {/* Small Preview */}
+              {previewType === "video" ? (
                 <video
                   src={newEffectPreview}
-                  className="w-24 h-24 mx-auto rounded-lg"
+                  className="w-24 h-24 mx-auto rounded-lg cursor-pointer object-cover"
                   autoPlay
                   loop
                   muted
@@ -1117,17 +1148,17 @@ export default function Revenue() {
               ) : (
                 <img
                   src={newEffectPreview}
-                  className="w-24 h-24 mx-auto rounded-lg cursor-pointer"
+                  className="w-24 h-24 mx-auto rounded-lg cursor-pointer object-cover"
                   onClick={() => setIsPreviewModalOpen(true)}
                 />
               )}
 
+              {/* Fullscreen Preview Modal */}
               {isPreviewModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-                  <div className="relative">
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+                  <div className="relative max-w-[90vw] max-h-[90vh]">
 
-                    {newEffectPreview.endsWith(".mp4") ||
-                      newEffectPreview.endsWith(".webm") ? (
+                    {previewType === "video" ? (
                       <video
                         src={newEffectPreview}
                         controls
@@ -1142,7 +1173,7 @@ export default function Revenue() {
                     )}
 
                     <button
-                      className="absolute top-2 right-2 text-white text-3xl"
+                      className="absolute -top-4 -right-4 bg-black text-white w-10 h-10 rounded-full flex items-center justify-center text-2xl"
                       onClick={() => setIsPreviewModalOpen(false)}
                     >
                       &times;
@@ -1171,9 +1202,9 @@ export default function Revenue() {
 
             <Input
               label="Effect Name"
-              value={selectedEffect.name}
+              value={selectedEffect.title}
               onChange={(e) =>
-                setSelectedEffect({ ...selectedEffect, name: e.target.value })
+                setSelectedEffect({ ...selectedEffect, title: e.target.value })
               }
             />
 
@@ -1204,25 +1235,29 @@ export default function Revenue() {
             />
 
             {/* Preview */}
-            {selectedEffect.fileUrl && (
-              <>
-                {selectedEffect.fileUrl.endsWith(".mp4") ||
-                  selectedEffect.fileUrl.endsWith(".mov") ? (
-                  <video
-                    src={selectedEffect.fileUrl}
-                    className="w-24 h-24 mx-auto"
-                    autoPlay
-                    loop
-                    muted
-                  />
-                ) : (
-                  <img
-                    src={selectedEffect.fileUrl}
-                    className="w-24 h-24 mx-auto rounded-lg"
-                  />
-                )}
-              </>
-            )}
+            {selectedEffect?.fileUrl && (() => {
+              const mediaType = getMediaType(selectedEffect.fileUrl);
+
+              return (
+                <>
+                  {mediaType === "video" ? (
+                    <video
+                      src={selectedEffect.fileUrl}
+                      className="w-24 h-24 mx-auto rounded-lg object-cover"
+                      autoPlay
+                      loop
+                      muted
+                    />
+                  ) : (
+                    <img
+                      src={selectedEffect.fileUrl}
+                      className="w-24 h-24 mx-auto rounded-lg object-cover"
+                    />
+                  )}
+                </>
+              );
+            })()}
+
 
             <Button
               variant="primary"
@@ -1244,7 +1279,7 @@ export default function Revenue() {
       >
         <p className="text-gray-700">
           Are you sure you want to delete{" "}
-          <strong>{selectedEffect?.name}</strong>?
+          <strong>{selectedEffect?.title}</strong>?
         </p>
 
         <div className="flex gap-4 mt-4">
