@@ -17,11 +17,11 @@ export default function Button({
     'font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variants = {
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white',
-    secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-800',
+    primary: 'btn-primary',
+    secondary: 'btn-secondary',
     danger: 'bg-red-600 hover:bg-red-700 text-white',
     success: 'bg-green-600 hover:bg-green-700 text-white',
-    ghost: 'bg-transparent hover:bg-gray-100 text-gray-700',
+    ghost: 'btn-ghost hover:bg-gray-100',
   };
 
   const sizes = {

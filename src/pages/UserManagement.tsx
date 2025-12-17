@@ -1093,7 +1093,7 @@ const userColumns = [
               <div className="space-y-4">
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="w-full md:w-1/2 relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
+                    <Search className="relative  left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
                     <Input
                       placeholder="Search users..."
                       className="pl-10"
