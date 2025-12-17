@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Users, Swords, AlertCircle, TrendingUp, Coins, UserX, Radio } from 'lucide-react';
+import { Users, Swords, AlertCircle, Coins, UserX, Radio } from 'lucide-react';
 import StatCard from '../components/StatCard';
 
 export default function Dashboard() {
@@ -19,9 +19,16 @@ export default function Dashboard() {
     const fetchStats = async () => {
       try {
         const res = await axios.get("http://localhost:4000/api/admin/dashboard");
-        
-        if (res.data.success) {
-          setStats(res.data.data);
+
+        // Safely handle 'unknown' res.data type
+        if (
+          res.data &&
+          typeof res.data === "object" &&
+          "success" in res.data &&
+          (res.data as any).success === true &&
+          "data" in res.data
+        ) {
+          setStats((res.data as any).data);
         }
       } catch (error) {
         console.error("Error fetching dashboard stats:", error);

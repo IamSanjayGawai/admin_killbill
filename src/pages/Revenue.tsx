@@ -6,7 +6,45 @@ import Input from "../components/Input";
 import Modal from "../components/Modal";
 import Tabs from "../components/Tabs";
 import axios from "axios";
-import { Plus, Edit, Trash2, Coins as CoinsIcon, Coins } from "lucide-react";
+import { Plus, Edit, Trash2, Coins as CoinsIcon} from "lucide-react";
+
+
+
+type NewPackage = {
+  _id: string
+  title: string;
+  coins: string;
+  price: string;
+  bonus: string;
+};
+
+type ApiResponse<T> = {
+  success: boolean;
+  data: T;
+  message?: string;
+};
+
+type Gift = {
+  _id: string;
+  name: string;
+  price: number;
+  icon: string;
+  newIconFile?: File;
+};
+
+type PreviewModalProps = {
+  open: boolean;
+  onClose: () => void;
+  fileUrl: string;
+  type: "image" | "video";
+};
+
+type EntryEffect = {
+  _id: string;
+  title: string;
+  price: number;
+  animation: string;
+};
 
 
 export default function Revenue() {
@@ -29,24 +67,33 @@ export default function Revenue() {
   const [platformFee, setPlatformFee] = useState("30");
   const [hostFee, setHostFee] = useState("70");
   // ---------------- Gift Management ----------------
-  const [gifts, setGifts] = useState([]);
+  const [gifts, setGifts] = useState<Gift[]>([]);
+
   const [newGiftName, setNewGiftName] = useState("");
   const [newGiftPrice, setNewGiftPrice] = useState("");
   const [newGiftIcon, setNewGiftIcon] = useState("");
 
   // ---------------- Coin Packages ----------------
 
-  const [newPackage, setNewPackage] = useState("");
+  const [newPackage, setNewPackage] = useState<NewPackage>({
+    title: "",
+    coins: "",
+    price: "",
+    bonus: "",
+    _id:"",
+  });
+  
 
   // ---------------- Coin Packages ----------------
-  const [coinPackages, setCoinPackages] = useState<any[]>([]);
+  // const [coinPackages, setCoinPackages] = useState<any[]>([]);
+  const [coinPackages, setCoinPackages] = useState<NewPackage[]>([]);
 
   const [editPackage, setEditPackage] = useState("");
 
 
-  const [newCoinCount, setNewCoinCount] = useState("");
-  const [newCoinPrice, setNewCoinPrice] = useState("");
-  const [newBonus, setNewBonus] = useState("");
+  // const [newCoinCount, setNewCoinCount] = useState("");
+  // const [newCoinPrice, setNewCoinPrice] = useState("");
+  // const [newBonus, setNewBonus] = useState("");
   const [editCoinCount, setEditCoinCount] = useState("");
   const [editCoinPrice, setEditCoinPrice] = useState("");
 
@@ -56,29 +103,28 @@ export default function Revenue() {
   // const [effects, setEffects] = useState([]);
   const [isEditEntryEffectModalOpen, setIsEditEntryEffectModalOpen] = useState(false);
   const [isDeleteEntryEffectModalOpen, setIsDeleteEntryEffectModalOpen] = useState(false);
-  const [title, setTitle] = useState("");
-  const [price, setPrice] = useState("");
-  const [selectedFile, setSelectedFile] = useState(null);
+  // const [title, setTitle] = useState("");
+  // const [price, setPrice] = useState("");
+  // const [selectedFile, setSelectedFile] = useState(null);
 
 
   const [newEffectFile, setNewEffectFile] = useState<File | null>(null);
   const [newEffectPreview, setNewEffectPreview] = useState("");
 
   const [newEffectName, setNewEffectName] = useState("");
-  const [newGiftIconFile, setNewGiftIconFile] = useState(null);
-
+  const [newGiftIconFile, setNewGiftIconFile] = useState<File | null>(null);
   const [selectedEffect, setSelectedEffect] = useState<any>(null);
 
   const [newEffectCoins, setNewEffectCoins] = useState("");
 
-  const [newEffectImagePreview, setNewEffectImagePreview] = useState(null);
+  // const [newEffectImagePreview, setNewEffectImagePreview] = useState(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
 
   // Preview Modal State
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewFile, setPreviewFile] = useState("");
-  const [previewType, setPreviewType] = useState(""); // 'image' | 'video'
+  const [previewType, setPreviewType] = useState<"image" | "video">("image");
 
 
   // ---------------- Entry Effect Functions ----------------
@@ -107,9 +153,12 @@ export default function Revenue() {
         }
       );
 
-      if (response.data.success) {
+      // Type guard to ensure response.data shape
+      const data = response.data as { success?: boolean; data?: any };
+
+      if (data && data.success) {
         // Add the new effect from backend response to frontend state
-        setEntryEffects((prev) => [...prev, response.data.data]);
+        setEntryEffects((prev) => [...prev, data.data]);
 
         // Reset form
         setNewEffectName("");
@@ -128,35 +177,35 @@ export default function Revenue() {
 
   // Entry Effect handlesubmit...........
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
 
-    if (!selectedFile) {
-      alert("Please select an animation file");
-      return;
-    }
+  //   if (!selectedFile) {
+  //     alert("Please select an animation file");
+  //     return;
+  //   }
 
-    try {
-      const token = localStorage.getItem("adminToken");
-      if (!token) throw new Error("Admin token not found");
+  //   try {
+  //     const token = localStorage.getItem("adminToken");
+  //     if (!token) throw new Error("Admin token not found");
 
-      const result = await createEntryEffect(
-        title,
-        String(price),   // ensure string for FormData
-        selectedFile,
-        token
-      );
+  //     const result = await createEntryEffect(
+  //       title,
+  //       String(price),   // ensure string for FormData
+  //       selectedFile,
+  //       token
+  //     );
 
-      console.log("Entry Effect Created:", result);
-      alert("Entry Effect Created Successfully");
+  //     console.log("Entry Effect Created:", result);
+  //     alert("Entry Effect Created Successfully");
 
-      fetchEntryEffects();  // refresh list
-      closeModal();
-    } catch (error: any) {
-      console.error(error);
-      alert(error.response?.data?.message || "Failed to create entry effect");
-    }
-  };
+  //     fetchEntryEffects();  // refresh list
+  //     closeModal();
+  //   } catch (error: any) {
+  //     console.error(error);
+  //     alert(error.response?.data?.message || "Failed to create entry effect");
+  //   }
+  // };
   const handleEditOpen = (pkg: any) => {
     setSelectedPackage(pkg);
     setEditPackage(pkg.title); // ✅ title not package
@@ -166,15 +215,15 @@ export default function Revenue() {
   };
 
   // ---------------- Gift Functions ----------------
-  const openEditModal = (item: any) => {
-    setSelectedGift(item);
-    setIsEditGiftModalOpen(true);
-  };
+  // const openEditModal = (item: any) => {
+  //   setSelectedGift(item);
+  //   setIsEditGiftModalOpen(true);
+  // };
 
-  const openDeleteModal = (item: any) => {
-    setSelectedGift(item);
-    setIsDeleteGiftModalOpen(true);
-  };
+  // const openDeleteModal = (item: any) => {
+  //   setSelectedGift(item);
+  //   setIsDeleteGiftModalOpen(true);
+  // };
 
   // coins packages................
 
@@ -186,7 +235,7 @@ export default function Revenue() {
     try {
       const token = localStorage.getItem("adminToken");
       console.log("token", token);
-      const response = await axios.post(
+      const response = await axios.post<ApiResponse<any>>(
         "http://localhost:4000/api/admin/coin-packages",
         {
           title: newPackage.title,
@@ -204,55 +253,56 @@ export default function Revenue() {
       if (response.data.success) {
         setCoinPackages((prev) => [...prev, response.data.data]);
         setIsCoinModalOpen(false);
-        setNewPackage({ title: "", coins: "", price: "", bonus: "" });
+        setNewPackage({ title: "", coins: "", price: "", bonus: "" ,_id:"",});
       }
-    } catch (error) {
+    } catch (error:any) {
       console.log("Error adding coin package:", error.response?.data || error.message);
     }
   };
 
-  const updateCoinPackage = async () => {
+  // const updateCoinPackage = async () => {
+  //   try {
+  //     const token = localStorage.getItem("adminToken");  // or use your auth method
+  //     if (!selectedPackage) {
+  //       alert("Please select a package");
+  //       return;
+  //     }
+
+  //     const response = await axios.put(
+  //       `http://localhost:4000/api/admin/coin-packages/${selectedPackage._id}`,
+  //       {
+  //         title,
+  //         coins,
+  //         price,
+  //         bonus,
+  //         isActive
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`
+  //         }
+  //       }
+  //     );
+
+  //     alert("Package updated successfully");
+  //     console.log(response.data);
+
+  //     // close modal
+  //     setShowAddModal(false);
+
+  //     // reload packages after update
+  //     fetchPackages();
+
+  //   } catch (error) {
+  //     console.error(error);
+  //     alert("Failed to update package");
+  //   }
+  // };
+
+  // const deleteCoinPackage = async (id) => {
+    const deleteCoinPackage = async (id: string | number) => {
     try {
-      const token = localStorage.getItem("adminToken");  // or use your auth method
-      if (!selectedPackage) {
-        alert("Please select a package");
-        return;
-      }
-
-      const response = await axios.put(
-        `http://localhost:4000/api/admin/coin-packages/${selectedPackage._id}`,
-        {
-          title,
-          coins,
-          price,
-          bonus,
-          isActive
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
-      alert("Package updated successfully");
-      console.log(response.data);
-
-      // close modal
-      setShowAddModal(false);
-
-      // reload packages after update
-      fetchPackages();
-
-    } catch (error) {
-      console.error(error);
-      alert("Failed to update package");
-    }
-  };
-
-  const deleteCoinPackage = async (id) => {
-    try {
-      const response = await axios.delete(
+       await axios.delete(
         `http://localhost:4000/api/admin/coin-packages/${id}`,
         {
           headers: {
@@ -289,7 +339,7 @@ export default function Revenue() {
 
 
       // Axios POST request
-      const response = await axios.post("http://localhost:4000/api/admin/gift", formData, {
+      const response = await axios.post<ApiResponse<any>>("http://localhost:4000/api/admin/gift", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
@@ -342,7 +392,7 @@ export default function Revenue() {
       alert("Coin package updated successfully!");
 
       setIsEditModalOpen(false);
-      fetchPackages(); // refresh table
+      // fetchPackages();
 
     } catch (error) {
       console.error(error);
@@ -369,7 +419,7 @@ export default function Revenue() {
         formData.append("icon", selectedGift.newIconFile);
       }
 
-      const response = await axios.put(
+      const response = await axios.put<ApiResponse<any>>(
         `http://localhost:4000/api/admin/gift/${selectedGift._id}`,
         formData,
         {
@@ -404,7 +454,7 @@ export default function Revenue() {
     try {
       const token = localStorage.getItem("adminToken");
 
-      const response = await axios.delete(
+      const response = await axios.delete<ApiResponse<any>>(
         `http://localhost:4000/api/admin/gift/${selectedGift._id}`,
         {
           headers: {
@@ -431,7 +481,7 @@ export default function Revenue() {
     try {
       const token = localStorage.getItem("adminToken");
 
-      const response = await axios.get(
+      const response = await axios.get<ApiResponse<any>>(
         "http://localhost:4000/api/admin/gift",
         {
           headers: {
@@ -452,7 +502,7 @@ export default function Revenue() {
   useEffect(() => {
     const fetchCoinPackages = async () => {
       try {
-        const response = await axios.get(
+        const response = await axios.get<ApiResponse<any>>(
           "http://localhost:4000/api/admin/coin-packages/",
           {
             headers: {
@@ -482,7 +532,7 @@ export default function Revenue() {
   useEffect(() => {
     const fetchFees = async () => {
       try {
-        const response = await axios.get(
+        const response = await axios.get<ApiResponse<any>>(
           "http://localhost:4000/api/admin/fees-management"
         );
 
@@ -501,7 +551,7 @@ export default function Revenue() {
 
   const handleSave = async () => {
     try {
-      const response = await axios.put(
+      const response = await axios.put<ApiResponse<any>>(
         "http://localhost:4000/api/admin/fees-management",
         {
           platformFee: Number(platformFee),
@@ -526,35 +576,35 @@ export default function Revenue() {
 
   // Entry Effect............
 
-  const createEntryEffect = async (title, price, file, token) => {
-    try {
-      const formData = new FormData();
-      formData.append("title", title);
-      formData.append("price", price);
-      formData.append("animation", file); // MUST match multer field name
+  // const createEntryEffect = async (title, price, file, token) => {
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append("title", title);
+  //     formData.append("price", price);
+  //     formData.append("animation", file); // MUST match multer field name
 
-      const response = await axios.post(
-        "http://localhost:4000/api/admin/entry-effects/",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+  //     const response = await axios.post(
+  //       "http://localhost:4000/api/admin/entry-effects/",
+  //       formData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "Content-Type": "multipart/form-data",
+  //         },
+  //       }
+  //     );
 
-      return response.data;
-    } catch (error) {
-      console.error("Error creating entry effect:", error);
-      throw error;
-    }
-  };
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("Error creating entry effect:", error);
+  //     throw error;
+  //   }
+  // };
 
   // Get Entry Effects .................    
   const fetchEntryEffects = async () => {
     try {
-      const response = await axios.get(
+      const response = await axios.get<ApiResponse<any>>(
         "http://localhost:4000/api/admin/entry-effects/"
       );
 
@@ -582,7 +632,7 @@ export default function Revenue() {
         formData.append("animation", selectedEffect.newFile);
       }
 
-      const response = await axios.put(
+      const response = await axios.put<ApiResponse<any>>(
         `http://localhost:4000/api/admin/entry-effects/${selectedEffect._id}`,
         formData,
         {
@@ -619,7 +669,7 @@ export default function Revenue() {
       const token = localStorage.getItem("adminToken");
       if (!token) throw new Error("Admin token not found");
 
-      const response = await axios.delete(
+      const response = await axios.delete<ApiResponse<any>>(
         `http://localhost:4000/api/admin/entry-effects/${id}`,
         {
           headers: {
@@ -1299,10 +1349,14 @@ export default function Revenue() {
 
 // ------------------------- PREVIEW MODAL -------------------------
 
-
-
-const PreviewModal = ({ open, onClose, fileUrl, type }) => {
+const PreviewModal = ({
+  open,
+  onClose,
+  fileUrl,
+  type,
+}: PreviewModalProps) => {
   if (!open) return null;
+
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999]">
@@ -1337,5 +1391,7 @@ const PreviewModal = ({ open, onClose, fileUrl, type }) => {
     </div>
   );
 };
+
+
 
 

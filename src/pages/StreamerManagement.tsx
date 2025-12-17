@@ -4,66 +4,17 @@ import Table from '../components/Table';
 import Button from '../components/Button';
 import Tabs from '../components/Tabs';
 import Modal from '../components/Modal';
-import { CheckCircle, XCircle, Eye, TrendingUp } from 'lucide-react';
+import { CheckCircle, XCircle } from 'lucide-react';
 import { generateMockStreamers, generateMockLiveStreams } from '../utils/mockData';
 
 export default function StreamerManagement() {
   const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
-  const [selectedStreamer, setSelectedStreamer] = useState<typeof mockStreamers[0] | null>(null);
+  const [selectedStreamer] = useState<typeof mockStreamers[0] | null>(null);
 
   const mockStreamers = generateMockStreamers(30);
   const mockLiveStreams = generateMockLiveStreams(15);
 
-  const applicationColumns = [
-    { key: 'id', label: 'Application ID' },
-    { key: 'name', label: 'Name' },
-    { key: 'email', label: 'Email' },
-    {
-      key: 'status',
-      label: 'Status',
-      render: (value: unknown) => {
-        const status = value as string;
-        const colors = {
-          pending: 'bg-yellow-100 text-yellow-800',
-          approved: 'bg-green-100 text-green-800',
-          rejected: 'bg-red-100 text-red-800'
-        };
-        return (
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ₹{colors[status as keyof typeof colors]}`}>
-            {status}
-          </span>
-        );
-      }
-    },
-    {
-      key: 'actions',
-      label: 'Actions',
-      render: (_: unknown, row: Record<string, unknown>) => (
-        <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => {
-              setSelectedStreamer(row as typeof mockStreamers[0]);
-              setIsApplicationModalOpen(true);
-            }}
-          >
-            <Eye size={16} />
-          </Button>
-          {row.status === 'pending' && (
-            <>
-              <Button size="sm" variant="success">
-                <CheckCircle size={16} />
-              </Button>
-              <Button size="sm" variant="danger">
-                <XCircle size={16} />
-              </Button>
-            </>
-          )}
-        </div>
-      )
-    }
-  ];
+
 
   const streamerColumns = [
     { key: 'id', label: 'Streamer ID' },
