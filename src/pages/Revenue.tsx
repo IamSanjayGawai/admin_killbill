@@ -7,7 +7,7 @@ import Modal from "../components/Modal";
 import Tabs from "../components/Tabs";
 import getMediaType from "../utils/mediatype"
 import axios from "axios";
-import { Plus, Edit, Trash2, Coins as CoinsIcon} from "lucide-react";
+import { Plus, Edit, Trash2, Coins as CoinsIcon } from "lucide-react";
 
 
 
@@ -40,12 +40,7 @@ type PreviewModalProps = {
   type: "image" | "video";
 };
 
-type EntryEffect = {
-  _id: string;
-  title: string;
-  price: number;
-  animation: string;
-};
+
 
 
 export default function Revenue() {
@@ -54,7 +49,7 @@ export default function Revenue() {
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
+  const [editOffer, setEditOffer] = useState("");
   const [isEntryEffectModalOpen, setIsEntryEffectModalOpen] = useState(false);
   const [isEditGiftModalOpen, setIsEditGiftModalOpen] = useState(false);
   const [isDeleteGiftModalOpen, setIsDeleteGiftModalOpen] = useState(false);
@@ -80,33 +75,26 @@ export default function Revenue() {
     coins: "",
     price: "",
     bonus: "",
-    _id:"",
+    _id: "",
   });
-  
+
 
   // ---------------- Coin Packages ----------------
-  // const [coinPackages, setCoinPackages] = useState<any[]>([]);
+
   const [coinPackages, setCoinPackages] = useState<NewPackage[]>([]);
 
   const [editPackage, setEditPackage] = useState("");
 
-
-  // const [newCoinCount, setNewCoinCount] = useState("");
-  // const [newCoinPrice, setNewCoinPrice] = useState("");
-  // const [newBonus, setNewBonus] = useState("");
   const [editCoinCount, setEditCoinCount] = useState("");
   const [editCoinPrice, setEditCoinPrice] = useState("");
 
 
   // ---------------- Entry Effects ----------------
   const [entryEffects, setEntryEffects] = useState<any[]>([]);
-  // const [effects, setEffects] = useState([]);
   const [isEditEntryEffectModalOpen, setIsEditEntryEffectModalOpen] = useState(false);
   const [isDeleteEntryEffectModalOpen, setIsDeleteEntryEffectModalOpen] = useState(false);
-  // const [title, setTitle] = useState("");
-  // const [price, setPrice] = useState("");
-  // const [selectedFile, setSelectedFile] = useState(null);
-
+  const [newEffectValidity, setNewEffectValidity] = useState("");
+  const [newEffectOffer, setNewEffectOffer] = useState("");
 
   const [newEffectFile, setNewEffectFile] = useState<File | null>(null);
   const [newEffectPreview, setNewEffectPreview] = useState("");
@@ -114,10 +102,11 @@ export default function Revenue() {
   const [newEffectName, setNewEffectName] = useState("");
   const [newGiftIconFile, setNewGiftIconFile] = useState<File | null>(null);
   const [selectedEffect, setSelectedEffect] = useState<any>(null);
+  const [newGiftOffer, setNewGiftOffer] = useState("");
 
   const [newEffectCoins, setNewEffectCoins] = useState("");
 
-  // const [newEffectImagePreview, setNewEffectImagePreview] = useState(null);
+
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
 
@@ -129,8 +118,8 @@ export default function Revenue() {
 
   // ---------------- Entry Effect Functions ----------------
   const handleAddEntryEffect = async () => {
-    if (!newEffectName || !newEffectFile || !newEffectCoins) {
-      alert("Please provide name, coins, and a file!");
+    if (!newEffectName || !newEffectFile || !newEffectCoins || !newEffectValidity) {
+      alert("Please provide name, coins,validity , and a file!");
       return;
     }
 
@@ -140,6 +129,10 @@ export default function Revenue() {
       const formData = new FormData();
       formData.append("title", newEffectName);
       formData.append("price", newEffectCoins);
+      formData.append(
+        "validityDays",
+        newEffectValidity === "lifetime" ? "-1" : newEffectValidity
+      );
       formData.append("animation", newEffectFile); // must match multer field
 
       const response = await axios.post(
@@ -165,6 +158,7 @@ export default function Revenue() {
         setNewEffectFile(null);
         setNewEffectPreview("");
         setNewEffectCoins("");
+        setNewEffectValidity("");
         setIsEntryEffectModalOpen(false);
 
         alert("Entry effect created successfully!");
@@ -175,37 +169,7 @@ export default function Revenue() {
     }
   };
 
-  // Entry Effect handlesubmit...........
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-
-  //   if (!selectedFile) {
-  //     alert("Please select an animation file");
-  //     return;
-  //   }
-
-  //   try {
-  //     const token = localStorage.getItem("adminToken");
-  //     if (!token) throw new Error("Admin token not found");
-
-  //     const result = await createEntryEffect(
-  //       title,
-  //       String(price),   // ensure string for FormData
-  //       selectedFile,
-  //       token
-  //     );
-
-  //     console.log("Entry Effect Created:", result);
-  //     alert("Entry Effect Created Successfully");
-
-  //     fetchEntryEffects();  // refresh list
-  //     closeModal();
-  //   } catch (error: any) {
-  //     console.error(error);
-  //     alert(error.response?.data?.message || "Failed to create entry effect");
-  //   }
-  // };
   const handleEditOpen = (pkg: any) => {
     setSelectedPackage(pkg);
     setEditPackage(pkg.title); // ✅ title not package
@@ -213,17 +177,6 @@ export default function Revenue() {
     setEditCoinPrice(String(pkg.price));
     setIsEditModalOpen(true);
   };
-
-  // ---------------- Gift Functions ----------------
-  // const openEditModal = (item: any) => {
-  //   setSelectedGift(item);
-  //   setIsEditGiftModalOpen(true);
-  // };
-
-  // const openDeleteModal = (item: any) => {
-  //   setSelectedGift(item);
-  //   setIsDeleteGiftModalOpen(true);
-  // };
 
   // coins packages................
 
@@ -253,56 +206,15 @@ export default function Revenue() {
       if (response.data.success) {
         setCoinPackages((prev) => [...prev, response.data.data]);
         setIsCoinModalOpen(false);
-        setNewPackage({ title: "", coins: "", price: "", bonus: "" ,_id:"",});
+        setNewPackage({ title: "", coins: "", price: "", bonus: "", _id: "", });
       }
-    } catch (error:any) {
+    } catch (error: any) {
       console.log("Error adding coin package:", error.response?.data || error.message);
     }
   };
-
-  // const updateCoinPackage = async () => {
-  //   try {
-  //     const token = localStorage.getItem("adminToken");  // or use your auth method
-  //     if (!selectedPackage) {
-  //       alert("Please select a package");
-  //       return;
-  //     }
-
-  //     const response = await axios.put(
-  //       `http://localhost:4000/api/admin/coin-packages/${selectedPackage._id}`,
-  //       {
-  //         title,
-  //         coins,
-  //         price,
-  //         bonus,
-  //         isActive
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`
-  //         }
-  //       }
-  //     );
-
-  //     alert("Package updated successfully");
-  //     console.log(response.data);
-
-  //     // close modal
-  //     setShowAddModal(false);
-
-  //     // reload packages after update
-  //     fetchPackages();
-
-  //   } catch (error) {
-  //     console.error(error);
-  //     alert("Failed to update package");
-  //   }
-  // };
-
-  // const deleteCoinPackage = async (id) => {
-    const deleteCoinPackage = async (id: string | number) => {
+  const deleteCoinPackage = async (id: string | number) => {
     try {
-       await axios.delete(
+      await axios.delete(
         `http://localhost:4000/api/admin/coin-packages/${id}`,
         {
           headers: {
@@ -574,32 +486,6 @@ export default function Revenue() {
     }
   };
 
-  // Entry Effect............
-
-  // const createEntryEffect = async (title, price, file, token) => {
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append("title", title);
-  //     formData.append("price", price);
-  //     formData.append("animation", file); // MUST match multer field name
-
-  //     const response = await axios.post(
-  //       "http://localhost:4000/api/admin/entry-effects/",
-  //       formData,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //           "Content-Type": "multipart/form-data",
-  //         },
-  //       }
-  //     );
-
-  //     return response.data;
-  //   } catch (error) {
-  //     console.error("Error creating entry effect:", error);
-  //     throw error;
-  //   }
-  // };
 
   // Get Entry Effects .................    
   const fetchEntryEffects = async () => {
@@ -627,6 +513,12 @@ export default function Revenue() {
       const formData = new FormData();
       formData.append("title", selectedEffect.title);
       formData.append("price", String(selectedEffect.price));
+      formData.append(
+        "validityDays",
+        String(selectedEffect.validityDays)
+      );
+      
+      
 
       if (selectedEffect.newFile) {
         formData.append("animation", selectedEffect.newFile);
@@ -789,6 +681,18 @@ export default function Revenue() {
               onChange={(e) => setNewPackage({ ...newPackage, price: e.target.value })}
             />
           </label>
+          <label className="block">
+            <span className="text-gray-700 font-medium">Offer</span>
+            <input
+              type="text"
+              className="mt-1 block w-full border rounded-lg p-2"
+              placeholder="e.g. 10% OFF"
+              value={newPackage.offer || ""}
+              onChange={(e) =>
+                setNewPackage({ ...newPackage, offer: e.target.value })
+              }
+            />
+          </label>
 
           <div className="flex justify-end gap-2 pt-4">
             <Button className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg" onClick={() => setIsCoinModalOpen(false)}>Cancel</Button>
@@ -823,6 +727,15 @@ export default function Revenue() {
               <input type="number" className="mt-1 block w-full border rounded-lg p-2" value={editCoinPrice} onChange={(e) => setEditCoinPrice(e.target.value)} />
             </label>
 
+            <label className="block">
+              <span className="text-gray-700 font-medium">Offer</span>
+              <input
+                type="text"
+                className="mt-1 block w-full border rounded-lg p-2"
+                value={editOffer}
+                onChange={(e) => setEditOffer(e.target.value)}
+              />
+            </label>
             <div className="flex justify-end gap-2 pt-4">
               <Button className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg" onClick={() => setIsEditModalOpen(false)}>
                 Cancel
@@ -939,6 +852,16 @@ export default function Revenue() {
             <input type="number" className="mt-1 block w-full border rounded-lg p-2" placeholder="Enter price" value={newGiftPrice} onChange={(e) => setNewGiftPrice(e.target.value)} />
           </label>
 
+          <label className="block">
+            <span className="text-gray-700 font-medium">Offer</span>
+            <input
+              type="text"
+              className="mt-1 block w-full border rounded-lg p-2"
+              placeholder="e.g. Festival Offer"
+              value={newGiftOffer}
+              onChange={(e) => setNewGiftOffer(e.target.value)}
+            />
+          </label>
           <div className="flex justify-end gap-2 pt-4">
             <Button className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg" onClick={() => setIsGiftModalOpen(false)}>Cancel</Button>
             <Button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700" onClick={handleAddGift}>Add Gift</Button>
@@ -983,6 +906,18 @@ export default function Revenue() {
             <label className="block">
               <span className="text-gray-700 font-medium">Price (coins)</span>
               <input type="number" value={selectedGift.price} onChange={(e) => setSelectedGift({ ...selectedGift, price: Number(e.target.value) })} className="mt-1 block w-full border rounded-lg p-2" />
+            </label>
+
+            <label className="block">
+              <span className="text-gray-700 font-medium">Offer</span>
+              <input
+                type="text"
+                value={selectedGift.offer || ""}
+                onChange={(e) =>
+                  setSelectedGift({ ...selectedGift, offer: e.target.value })
+                }
+                className="mt-1 block w-full border rounded-lg p-2"
+              />
             </label>
 
             <div className="flex justify-end gap-2 pt-4">
@@ -1090,6 +1025,14 @@ export default function Revenue() {
               <p className="font-semibold text-gray-900 mt-2">{item.title}</p>
               <p className="text-blue-600 font-bold">{item.price} coins</p>
 
+              {/* ✅ ADD THIS */}
+              <span className="inline-block mt-1 px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full">
+                {item.validityDays === -1
+                  ? "Lifetime"
+                  : `${item.validityDays} Days`}
+              </span>
+
+
               {/* Actions */}
               <div className="flex gap-2 justify-center mt-3">
                 <Button
@@ -1144,20 +1087,31 @@ export default function Revenue() {
             onChange={(e) => setNewEffectCoins(e.target.value)}
           />
 
-          {/* <Input
-            label="Upload File (Image / Video)"
-            type="file"
-            accept="image/*, video/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0] || null;
-              setNewEffectFile(file);
-              if (file) {
-                const previewURL = URL.createObjectURL(file);
-                setNewEffectPreview(previewURL);
-              }
-            }}
-          /> */}
+          {/* ✅ ADD VALIDITY FIELD HERE */}
+          <label className="block">
+            <span className="text-gray-700 font-medium">Validity</span>
+            <select
+              className="mt-1 block w-full border rounded-lg p-2"
+              value={newEffectValidity}
+              onChange={(e) => setNewEffectValidity(e.target.value)}
+            >
+              {/* <option value="">Select validity</option> */}
+              <option value="15">15 Days</option>
+              <option value="30">30 Days</option>
+              <option value="45">45 Days</option>
+              <option value="100">100 Days</option>
+              <option value="200">200 Days</option>
+              <option value="365">365 Days</option>
+              <option value="lifetime">Lifetime</option>
+            </select>
+          </label>
 
+          <Input
+            label="Offer"
+            placeholder="e.g. Limited Time Offer"
+            value={newEffectOffer}
+            onChange={(e) => setNewEffectOffer(e.target.value)}
+          />
 
           {/* // When setting preview for new entry effect */}
           <Input
@@ -1178,6 +1132,7 @@ export default function Revenue() {
                   setPreviewType("image");
                 }
               }
+
             }}
           />
 
@@ -1229,6 +1184,7 @@ export default function Revenue() {
                       &times;
                     </button>
                   </div>
+
                 </div>
               )}
             </>
@@ -1267,6 +1223,45 @@ export default function Revenue() {
               }
             />
 
+            {/* ✅ EDIT VALIDITY FIELD */}
+            <label className="block">
+              <span className="text-gray-700 font-medium">Validity</span>
+              <select
+                className="mt-1 block w-full border rounded-lg p-2"
+                value={
+                  selectedEffect.validityDays === -1
+                    ? "lifetime"
+                    : String(selectedEffect.validityDays)
+                }
+                
+                onChange={(e) =>
+                  setSelectedEffect({
+                    ...selectedEffect,
+                    validityDays: e.target.value === "lifetime"
+                      ? -1
+                      : Number(e.target.value),
+                  })
+                }
+                
+              >
+                {/* <option value="">Select validity</option> */}
+                <option value="15">15 Days</option>
+                <option value="30">30 Days</option>
+                <option value="45">45 Days</option>
+                <option value="100">100 Days</option>
+                <option value="200">200 Days</option>
+                <option value="365">365 Days</option>
+                <option value="lifetime">Lifetime</option>
+              </select>
+            </label>
+
+            <Input
+              label="Offer"
+              value={selectedEffect.offer || ""}
+              onChange={(e) =>
+                setSelectedEffect({ ...selectedEffect, offer: e.target.value })
+              }
+            />
             <Input
               label="Replace Image / Video"
               type="file"
@@ -1307,8 +1302,6 @@ export default function Revenue() {
                 </>
               );
             })()}
-
-
             <Button
               variant="primary"
               onClick={handleSaveEntryEffectEdit}
@@ -1351,8 +1344,6 @@ export default function Revenue() {
       </Modal>
     </div>
   );
-
-
   // -------------------- Return --------------------
   return (
     <div className="space-y-6">
@@ -1380,8 +1371,6 @@ export default function Revenue() {
     </div>
   );
 }
-
-
 // ------------------------- PREVIEW MODAL -------------------------
 
 const PreviewModal = ({
