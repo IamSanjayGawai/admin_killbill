@@ -1,0 +1,163 @@
+import { useState } from 'react';
+import Card from '../components/Card';
+import Table from '../components/Table';
+import Button from '../components/Button';
+import Tabs from '../components/Tabs';
+import Modal from '../components/Modal';
+import { CheckCircle, XCircle } from 'lucide-react';
+import { generateMockStreamers, generateMockLiveStreams } from '../utils/mockData';
+
+export default function StreamerManagement() {
+  const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
+  const [selectedStreamer] = useState<typeof mockStreamers[0] | null>(null);
+
+  const mockStreamers = generateMockStreamers(30);
+  const mockLiveStreams = generateMockLiveStreams(15);
+
+
+
+  const streamerColumns = [
+    { key: 'id', label: 'Streamer ID' },
+    { key: 'name', label: 'Name' },
+    { key: 'rank', label: 'Rank' },
+    { key: 'level', label: 'Level' },
+    {
+      key: 'earnings',
+      label: 'Earnings',
+      render: (value: unknown) => `₹${(value as number).toLocaleString()}`
+    },
+    {
+      key: 'followers',
+      label: 'Followers',
+      render: (value: unknown) => (value as number).toLocaleString()
+    },
+    { key: 'totalStreams', label: 'Total Streams' },
+  
+  ];
+
+  const liveMonitoringColumns = [
+   
+    { key: 'streamerName', label: 'Streamer' },
+    { key: 'title', label: 'Title' },
+    {
+      key: 'viewers',
+      label: 'Viewers',
+      render: (value: unknown) => (
+        <div className="flex items-center gap-1">
+          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+          <span className="font-medium">{(value as number).toLocaleString()}</span>
+        </div>
+      )
+    },
+    {
+      key: 'duration',
+      label: 'Duration',
+      render: (value: unknown) => `${value} min`
+    },
+    { key: 'category', label: 'Category' },
+   
+  ];
+
+  
+  const streamersTab = (
+    <Card>
+            <Table columns={streamerColumns} data={mockStreamers.slice(0, 10)} />
+    </Card>
+  );
+
+  const liveMonitoringTab = (
+    <Card>
+      <Table columns={liveMonitoringColumns} data={mockLiveStreams} />
+    </Card>
+  );
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Streamer Management</h1>
+        <p className="text-gray-600 mt-1">Manage streamers and monitor live content</p>
+      </div>
+
+      <Tabs
+        tabs={[
+         
+          {
+             key: 'streamers',
+              label: `All Streamers (${mockStreamers.length})`, 
+             content: streamersTab
+             },
+          {
+             key: 'live',
+              label: `Live Monitoring (${mockStreamers.length})`,
+             content: liveMonitoringTab }
+        ]}
+      />
+
+      <Modal
+        isOpen={isApplicationModalOpen}
+        onClose={() => setIsApplicationModalOpen(false)}
+        title="Streamer Application Details"
+        size="lg"
+        footer={
+          <>
+            <Button variant="danger" onClick={() => setIsApplicationModalOpen(false)}>
+              <XCircle size={18} className="mr-2" />
+              Reject
+            </Button>
+            <Button variant="success" onClick={() => setIsApplicationModalOpen(false)}>
+              <CheckCircle size={18} className="mr-2" />
+              Approve
+            </Button>
+          </>
+        }
+      >
+        {selectedStreamer && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-600">Name</p>
+                <p className="font-medium">{selectedStreamer.name}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Email</p>
+                <p className="font-medium">{selectedStreamer.email}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Total Streams</p>
+                <p className="font-medium">{selectedStreamer.totalStreams}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Followers</p>
+                <p className="font-medium">{selectedStreamer.followers.toLocaleString()}</p>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-600 mb-2">Application Notes</p>
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm">
+                  Experienced content creator with a strong following. Specializes in entertainment and talk shows.
+                  Previous experience includes streaming on other platforms with consistent engagement.
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-600 mb-2">Sample Content</p>
+              <div className="grid grid-cols-3 gap-2">
+                {[1, 2, 3].map((i) => (
+                  <img
+                    key={i}
+                    src={`https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=400`}
+                    alt={`Sample ₹{i}`}
+                    className="w-full h-24 object-cover rounded"
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
+    </div>
+  );
+}
