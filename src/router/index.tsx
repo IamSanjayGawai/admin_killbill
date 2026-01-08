@@ -12,6 +12,8 @@ import ProtectedRoute from './ProtectedRoute';
 import LeaderBoard from '../pages/LeaderBoard'
 import OfferManagement from '../pages/OfferManagement'
 import NotificationManagement from '../pages/NotificationManagement'
+import UserTransactionHistory from '../pages/UserTransactionHistory'
+import PlatformFees from '../pages/PlatformFees'
 export const router = createBrowserRouter([
   {
     path: '/login',
@@ -65,6 +67,14 @@ export const router = createBrowserRouter([
       {
         path: 'notifications',
         element: <NotificationManagement />
+      },
+      {
+        path: 'users/:userId/transactions',
+        element: <UserTransactionHistory />
+      },
+      {
+        path: 'platform-fees',
+        element: <PlatformFees />
       }
     ]
   }

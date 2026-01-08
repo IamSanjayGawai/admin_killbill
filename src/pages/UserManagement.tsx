@@ -7,7 +7,8 @@ import Select from '../components/Select';
 import Modal from '../components/Modal';
 import Tabs from '../components/Tabs';
 import axios from 'axios';
-import { Search, Edit, Eye, Download, Filter, Users as UsersIcon, AlertTriangle, X, Activity } from 'lucide-react';
+import { Search, Edit, Eye, Download, Filter, Users as UsersIcon, AlertTriangle, X, Activity, History } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 type UserStatus = 'active' | 'blocked' | 'suspended';
 
@@ -34,6 +35,7 @@ type UserReport = {
 };
 
 export default function UserManagement() {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | UserStatus>('all');
@@ -61,6 +63,7 @@ export default function UserManagement() {
   // ACTIVITY LOG
   const [recentActivity, setRecentActivity] = useState<string[]>([]);
   const [activityLoading, setActivityLoading] = useState(false);
+
 
   const normalizedSearch = searchQuery.trim().toLowerCase();
 
@@ -280,6 +283,8 @@ export default function UserManagement() {
     }
   };
 
+
+
   // TABLE COLUMNS
   const userColumns = [
     { key: '_id', label: 'User ID' },
@@ -330,6 +335,25 @@ export default function UserManagement() {
       render: (value: unknown) => (
         <span className="font-semibold text-gray-900">{Number(value).toLocaleString()}</span>
       )
+    },
+    {
+      key: 'transaction_history',
+      label: 'Transaction History',
+      render: (_value: unknown, row: Record<string, unknown>) => {
+        const typedRow = row as User;
+        return (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="hover:bg-purple-50 hover:text-purple-600"
+            onClick={() => {
+              navigate(`/users/${typedRow._id}/transactions`);
+            }}
+          >
+            <History size={16} />
+          </Button>
+        );
+      },
     },
     {
       key: 'actions',
@@ -869,6 +893,7 @@ export default function UserManagement() {
           </div>
         )}
       </Modal>
+
     </div>
   );
 }

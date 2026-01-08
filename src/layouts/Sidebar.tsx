@@ -11,7 +11,8 @@ import {
   Banknote ,
   Trophy,
   Tag,
-  Bell
+  Bell,
+  Percent
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -30,6 +31,7 @@ const menuItems: MenuItem[] = [
   { path: '/users', icon: Users, label: 'User Management' },
   { path: '/streamers', icon: UserCheck, label: 'Streamer Management' },
    { path: '/revenue', icon: Coins, label: 'Coins & Revenue' },
+   { path: '/platform-fees', icon: Percent, label: 'Platform Fees' },
    { path: '/withdrawals', icon:  Banknote, label: 'Withdrawal Requests' },
    { path: '/leaderboard',icon:Trophy,label:'LeaderBoard'},
   { path: '/offers', icon: Tag, label: 'Offer Management' },
